@@ -109,6 +109,6 @@ caption = ggplot(data.frame(x = 1:20, y = 1:20)) +
 ```{r full-panel, fig.width = 14, fig.height = 5.5}
 title + plot_counts + plot_counts_2 + caption + plot_layout(widths = c(0, 1, 1, 0), nrow = 1)
 
-ggsave(here::here("outputs", "2020-01_berkeleycourses.pdf"), 
+ggsave(here::here("outputs", "2020-01_berkeleycourses.png"), 
        width = 14, height = 5.6)
 ```
