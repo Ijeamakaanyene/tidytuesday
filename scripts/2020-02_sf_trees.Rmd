@@ -100,7 +100,7 @@ common_trees_plot
 
 ```{r}
 ggsave(here::here("outputs", "2020-02_sftrees.png"), 
-       width = 10, height = 6)
+       width = 10, height = 8)
 ```
 
 
