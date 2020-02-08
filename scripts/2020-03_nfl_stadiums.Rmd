@@ -81,12 +81,18 @@ hometeam_advantage %>%
 ```
 
 ```{r}
-bar_plot = 
 hometeam_advantage %>%
-  ggplot(., aes(x = home_team_name, y = perc_wins, 
+  mutate(home_team_name_reor = forcats::fct_reorder(home_team_name, -perc_wins))
+
+```
+
+
+```{r}
+bar_plot = hometeam_advantage %>%
+  ggplot(., aes(x = reorder(home_team_name, total_wins), y = total_wins, 
                 fill = home_team_name)) +
   geom_col() +
-  labs(y = "% of Home Wins / All Wins",
+  labs(y = "Total Wins",
          x = "Team Name") +
   coord_flip() +
   theme(
@@ -97,12 +103,13 @@ hometeam_advantage %>%
     panel.border = element_blank(),
     panel.grid = element_blank()
   )
+bar_plot
 ```
 
 ```{r}
 bar_plot + scatter_plot +
   plot_annotation(title = "Home Field Advantage",
-                  subtitle = "Does playing a game at home give the team an advantage? \nYes for the Vikings, but not so much for the Giants.",
+                  subtitle = "Does playing a game at home give the team an advantage? \nNot exactly, the teams with the most wins do not win more during home games.",
                   caption = paste0("Source:  Pro Football Reference\n",
                      "Visualization: Ijeamaka Anyene"),
                   theme = theme(plot.title = element_text(size = 24, 
