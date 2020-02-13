@@ -1,0 +1,59 @@
+---
+title: "2020-04 Hotel Bookings"
+author: "Ijeamaka Anyene"
+date: "2/12/2020"
+output: pdf_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggtext)
+library(gganimate)
+```
+
+```{r}
+hotels = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-11/hotels.csv')
+```
+
+```{r}
+my_color_palette = c(RColorBrewer::brewer.pal(11, "RdYlBu"), "#081D58")
+#RColorBrewer::brewer.pal(9, "YlGnBu")
+```
+
+```{r}
+books_by_date = hotels %>%
+  mutate(arrival_month = forcats::fct_relevel(arrival_date_month, 
+                                              "January", "February", "March",
+                                              "April", "May", "June", "July",
+                                              "August", "September", "October",
+                                              "November", "December")) %>%
+  filter(reservation_status != "Canceled") %>%
+  group_by(arrival_date_year, arrival_month) %>% 
+  summarise(num_bookings = n()) %>%
+  ungroup() %>%
+  mutate(avg_bookings = mean(num_bookings), 
+         diff_avg_bookings = num_bookings - avg_bookings)
+```
+
+```{r}
+ggplot(books_by_date, aes(x = arrival_month, y = diff_avg_bookings, 
+                          colour = arrival_month,
+                          label = paste0(arrival_date_year))) +
+  geom_point(stat='identity', size=8) +
+  geom_segment(aes(y = 0, x = arrival_month,
+                   yend = diff_avg_bookings, xend = arrival_month)) +
+  geom_text(color="white", size=2) +
+  scale_color_manual(values = my_color_palette) +
+  labs(x = NULL, y = NULL, 
+       title = "Off-season and Peak Season Hotel Bookings",
+       colour = "Month of Booking") +
+  coord_flip() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "bottom"
+  )
+  
+```
+
