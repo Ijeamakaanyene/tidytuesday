@@ -51,13 +51,15 @@ ggplot(books_by_date, aes(x = arrival_month, y = diff_avg_bookings,
   labs(x = NULL, y = NULL, 
        title = "Off-Season and Peak Season Hotel Bookings",
        colour = "Month of Booking",
-       subtitle = "The difference between overall average bookings, and the amount of bookings that occurred by month.") +
+       subtitle = "The difference between overall average bookings, and the amount of bookings that occurred by month.",
+       caption = "Source: Antonio, Almeida and Nunes, 2019\n Visualization: Ijeamaka Anyene\n @ijeamaka_a") +
   coord_flip() +
   guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
   theme(
     #panel.background = element_rect(colour = "grey"),
     plot.title = element_text(size = 18, face = "bold"),
     plot.background = element_rect(fill = "white"),
+    plot.caption = element_text(face = "italic"),
     panel.background = element_rect(fill = "white"),
     panel.grid = element_line(colour = "#f1f1f1"),
     panel.grid.major.x = element_blank(),
