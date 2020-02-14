@@ -18,6 +18,12 @@ This visualization used the NFL Pro Football Reference data in order to explore 
 ![NFL Games](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-03_nfl_stadiums.png)
 </br></br>
 
+<b> Third Week (02/09/2020 - 02/15/2020)</b><br>
+A TidyTuesday project from the R4DS community. </br>
+This visualization used the an open hotel booking demand dataset from Antonio, Almeida and Nunes, 2019 to see when are the off-seasons and peak-seasons for hotel reservation.</br>
+![Hotel Bookings](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-04_hotel_bookings.png)
+</br></br>
+
 
 
 
