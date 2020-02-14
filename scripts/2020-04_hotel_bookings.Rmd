@@ -18,7 +18,9 @@ hotels = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidy
 
 ```{r}
 my_color_palette = c(RColorBrewer::brewer.pal(11, "RdYlBu"), "#081D58")
-#RColorBrewer::brewer.pal(9, "YlGnBu")
+my_color_palette = my_color_palette[c(9, 8, 7, 6, 5, 4, 1, 2, 3, 10, 11, 12)]
+my_color_palette[4] = "#feba90"
+my_color_palette
 ```
 
 ```{r}
@@ -40,20 +42,37 @@ books_by_date = hotels %>%
 ggplot(books_by_date, aes(x = arrival_month, y = diff_avg_bookings, 
                           colour = arrival_month,
                           label = paste0(arrival_date_year))) +
-  geom_point(stat='identity', size=8) +
+  geom_hline(yintercept = 0, colour = "grey") +
+  geom_point(stat='identity', size=12) +
   geom_segment(aes(y = 0, x = arrival_month,
                    yend = diff_avg_bookings, xend = arrival_month)) +
-  geom_text(color="white", size=2) +
-  scale_color_manual(values = my_color_palette) +
+  geom_text(color="white", size=3) +
+  scale_color_manual(values = my_color_palette) + 
   labs(x = NULL, y = NULL, 
-       title = "Off-season and Peak Season Hotel Bookings",
-       colour = "Month of Booking") +
+       title = "Off-Season and Peak Season Hotel Bookings",
+       colour = "Month of Booking",
+       subtitle = "The difference between overall average bookings, and the amount of bookings that occurred by month.") +
   coord_flip() +
+  guides(colour = guide_legend(nrow = 2, byrow = TRUE)) +
   theme(
+    #panel.background = element_rect(colour = "grey"),
+    plot.title = element_text(size = 18, face = "bold"),
+    plot.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_line(colour = "#f1f1f1"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
-    legend.position = "bottom"
+    legend.position = "bottom",
+    legend.background = element_rect(fill = "white"),
+    legend.key = element_rect(fill = "white"),
   )
   
+```
+
+```{r}
+ggsave(here::here("outputs", "2020-04_hotel_bookings.png"), width = 12, height = 7)
+
 ```
 
