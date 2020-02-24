@@ -24,6 +24,11 @@ This visualization used the an open hotel booking demand dataset from Antonio, A
 ![Hotel Bookings](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-04_hotel_bookings.png)
 </br></br>
 
+<b> Fourth Week (02/16/2020 - 02/22/2020)</b><br>
+Another TidyTuesday project from the R4DS community! </br>
+This visualization used webscrapped data on food consumption and associated CO2 emissions globally</br></br>
+![CO2 Emissions](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-05_carbon_emissions.png.png)
+</br></br>
 
 
 
