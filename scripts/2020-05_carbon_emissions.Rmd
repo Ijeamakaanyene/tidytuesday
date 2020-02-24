@@ -1,0 +1,67 @@
+---
+title: "2020_05_carbon_emissions"
+author: "Ijeamaka Anyene"
+date: "2/18/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(treemapify)
+library(patchwork)
+```
+
+```{r}
+food_consumption = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-18/food_consumption.csv')
+```
+
+```{r}
+food_grouped = food_consumption %>%
+  group_by(food_category) %>% 
+  summarise(total_consumption = sum(consumption),
+            total_co2 = sum(co2_emmission),
+            consump_co2_ratio = total_co2/total_consumption) %>%
+  mutate(perc_co2 = 
+              total_co2 / sum(total_co2) * 100)
+```
+
+```{r}
+treemap1 = food_grouped %>%
+  ggplot(., aes(area = perc_co2, fill = food_category)) +
+  geom_treemap(colour = "black") +
+  scale_fill_brewer(palette = "Spectral") +
+  labs(x = "Percentage of CO2 Emissions", fill = NULL) +
+  theme(axis.title.x = element_text(face = "bold"),
+        legend.position = "none")
+
+```
+
+
+```{r}
+treemap2 = food_grouped %>%
+  ggplot(., aes(area = consump_co2_ratio, fill = food_category)) +
+  geom_treemap(colour = "black") +
+  scale_fill_brewer(palette = "Spectral") +
+  labs(x = "Total CO2 Emissions:Total Consumption", fill = NULL) +
+  theme(axis.title.x = element_text(face = "bold"))
+```
+
+```{r}
+treemap1 + treemap2 +
+  plot_annotation(title = "Food Consumption and CO2 Emissions",
+                  subtitle = "The food groups with the worst CO2 to consumption ratio are \nnot necessarily the largest food sources of CO2 emissions.",
+                  caption = paste0("Source:  nu3\n",
+                     "Visualization: Ijeamaka Anyene \n @ijeamaka_a"),
+                  theme = theme(plot.title = element_text(size = 24, 
+                                                          hjust = 0.5,
+                                                          face = "bold"),
+                                plot.subtitle = element_text(size = 16, 
+                                                             hjust = 0.5,
+                                                             face = "bold.italic"),
+                                plot.caption = element_text(face = "italic")
+                                ))
+
+ggsave(here::here("outputs", "2020-05_carbon_emissions.png"), width = 14, height = 7)
+```
+
