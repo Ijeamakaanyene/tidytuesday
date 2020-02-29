@@ -61,6 +61,6 @@ figure1
 ```
 
 ```{r}
-ggsave(here::here("outputs", "2020-06_measles.png"), plot = figure1, width = 12, height = 7)
+ggsave(here::here("outputs", "2020-06_measles.png"), plot = figure1, width = 10, height = 8)
 ```
 
