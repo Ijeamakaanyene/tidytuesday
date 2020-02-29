@@ -46,8 +46,10 @@ figure1 = herd_immunity %>%
        caption = paste0("Source:  The Wallstreet Journal\n",
                      "Visualization: Ijeamaka Anyene \n @ijeamaka_a")) +
   scale_fill_manual(values = my_palette) +
-  theme(plot.title = element_markdown(lineheight = 1.1, face = "bold"),
-        strip.text.x = element_text(size = 6, face = "bold"),
+  theme(plot.title = element_markdown(lineheight = 1.1, face = "bold", size = 16),
+        plot.subtitle = element_text(size = 12),
+        plot.caption = element_text(face = "italic"),
+        strip.text.x = element_text(size = 7.5, face = "bold"),
         plot.background = element_rect(fill = "white"),
         panel.background = element_rect(fill = "white", colour = "black"),
         axis.text.x = element_blank(),
