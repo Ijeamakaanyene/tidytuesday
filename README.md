@@ -30,5 +30,11 @@ This visualization used webscrapped data on food consumption and associated CO2 
 ![CO2 Emissions](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-05_carbon_emissions.png)
 </br></br>
 
+<b> Fifth Week (02/23/2020 - 02/29/2020)</b><br>
+Unsurprisingly, another TidyTuesday project from the R4DS community! Soon my schedule will free up and I can explore other datasets</br>
+This visualization used data collected for an article by the WallStreet Journal on measles outbreaks.</br></br>
+![Measles](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-06_measles.png)
+</br></br>
+
 
 

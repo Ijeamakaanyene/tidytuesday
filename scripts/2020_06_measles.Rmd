@@ -1,0 +1,64 @@
+---
+title: "2020_06_measles"
+author: "Ijeamaka Anyene"
+date: "2/28/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(geofacet)
+library(ggtext)
+```
+
+
+```{r}
+measles = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-25/measles.csv')
+```
+
+```{r}
+temp = RColorBrewer::brewer.pal(11, "RdYlBu")
+my_palette = temp[c(1, 10)]
+```
+
+```{r}
+# Data Preparation
+herd_immunity = measles %>%
+  filter(mmr > -1) %>%
+  mutate(herd_immunity = if_else(mmr >= 95, "Yes", "No")) %>%
+  group_by(state, herd_immunity) %>%
+  summarise(counts = n()) %>%
+  group_by(state) %>%
+  mutate(percent = counts / sum(counts),
+         ymax = cumsum(percent),
+         ymin = c(0, ymax[1])) %>%
+    mutate(state_names = state)
+```
+
+```{r}
+figure1 = herd_immunity %>%
+  ggplot(., aes(ymax=ymax, ymin=ymin, xmax=0, xmin=1, fill= herd_immunity)) +
+  geom_rect() +
+  geofacet::facet_geo(~state_names) +
+  labs(title = "Percentage of Schools <span style='color:#4575B4'>Above</span> and <span style='color:#A50026'>Below</span> 95% MMR Vaccination Rate",
+       subtitle = "It is recommended that at least 95% of children receive the MMR vaccine before 2 years of age. \nDue to state legislature allowing religious and personal exemptions, this goal is not reached in many states.",
+       caption = paste0("Source:  The Wallstreet Journal\n",
+                     "Visualization: Ijeamaka Anyene \n @ijeamaka_a")) +
+  scale_fill_manual(values = my_palette) +
+  theme(plot.title = element_markdown(lineheight = 1.1, face = "bold"),
+        strip.text.x = element_text(size = 6, face = "bold"),
+        plot.background = element_rect(fill = "white"),
+        panel.background = element_rect(fill = "white", colour = "black"),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")
+
+figure1
+```
+
+```{r}
+ggsave(here::here("outputs", "2020-06_measles.png"), plot = figure1, width = 12, height = 7)
+```
+
