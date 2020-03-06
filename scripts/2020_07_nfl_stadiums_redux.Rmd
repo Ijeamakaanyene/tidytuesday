@@ -1,7 +1,7 @@
 ---
-title: "2020-03"
+title: "2020_07_nfl_stadiums_redux"
 author: "Ijeamaka Anyene"
-date: "2/7/2020"
+date: "3/6/2020"
 output: html_document
 ---
 
@@ -58,9 +58,19 @@ hometeam_advantage = left_join(hometeam_advantage, wins_losses,
 ```
 
 ```{r}
+highlight_teams = hometeam_advantage %>%
+  filter(perc_wins >= 60, perc_loss <= 38) %>%
+  select(home_team_name)
+
+highlight_teams = highlight_teams[,1, drop = TRUE]
+
+```
+
+```{r}
 scatter_plot = hometeam_advantage %>%
   ggplot(., aes(x = perc_loss, y = perc_wins, colour = home_team_name)) +
   geom_point(size = 3) +
+  gghighlight(home_team_name %in% highlight_teams) + 
   labs(y = "% of Home Wins / All Wins",
          x = "% of Home Losses / All Losses") +
   theme(
@@ -87,6 +97,7 @@ bar_plot = hometeam_advantage %>%
   ggplot(., aes(x = reorder(home_team_name, total_wins), y = total_wins, 
                 fill = home_team_name)) +
   geom_col() +
+  gghighlight(home_team_name %in% highlight_teams) + 
   labs(y = "Total Wins",
          x = "Team Name") +
   coord_flip() +
@@ -116,5 +127,5 @@ bar_plot + scatter_plot +
                                 plot.caption = element_text(face = "italic")
                                 ))
 
-ggsave(here::here("outputs", "2020-03_nfl_stadiums.png"), width = 14, height = 7)
+ggsave(here::here("outputs", "2020-07_nfl_stadiums_redux.png"), width = 14, height = 7)
 ```
