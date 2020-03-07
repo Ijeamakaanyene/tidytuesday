@@ -37,4 +37,11 @@ This visualization used data collected for an article by the WallStreet Journal 
 </br></br>
 
 
+<b> Sixth Week (03/01/2020 - 03/07/2020)</b><br>
+For the month of March, I decided that on weeks where I want do not want to explore a new dataset, I can instead revist old visualizations and try to improve them! For this week - I revisied my NFL home field advantage data viz - to see if I can improve conveying the message of the lack of home field advantage. I think I did a pretty good job!</br>
+This visualization used the NFL Pro Football Reference data in order to explore home field advantage</br></br>
+![NFL-redux](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-07_nfl_stadiums_redux.png)
+</br></br>
+
+
 
