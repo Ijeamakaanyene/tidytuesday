@@ -1,0 +1,83 @@
+---
+title: 'TidyTuesday: Animal Crossing'
+author: "Ijeamaka Anyene"
+date: "5/5/2020"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggtext)
+```
+
+```{r}
+items = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/items.csv')
+villagers = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/villagers.csv')
+
+```
+
+```{r}
+villager_data_grouped = 
+  villagers %>%
+  mutate(birthday_new = paste0(birthday, "-", "2020"),
+         birthday_new = lubridate::mdy(birthday_new)) %>%
+  group_by(birthday_new, personality, species) %>%
+  summarise(counts = n())
+```
+
+```{r}
+calendar_dates = villager_data_grouped %>%
+  mutate(year = lubridate::year(birthday_new),
+         month = lubridate::month(birthday_new, label = TRUE), 
+         day = lubridate::day(birthday_new),
+         weekday = lubridate::wday(birthday_new, label = TRUE),
+         week = lubridate::week(birthday_new), 
+         label = paste0(weekday, "<br>", day)) %>%
+  arrange(week)
+
+```
+
+```{r}
+duplicates = calendar_dates %>%
+  group_by(birthday_new) %>%
+  summarise(counts = n())
+```
+
+```{r}
+personality_calendar = calendar_dates %>%
+  ggplot(aes(x = day, y = forcats::fct_rev(month), 
+             fill = personality, label = label)) +
+  geom_tile(colour = "white", width = 1, height = 0.75) +
+  geom_richtext(fill = NA, label.color= NA, color = "white", size = 3) +
+  scale_fill_manual(values = rcartocolor::carto_pal(n = 8, name = "Antique")) +
+  labs(x = NULL, y = NULL, fill = NULL,
+       title = "A 2020 Calendar of Animal Crossing Personalities",
+       subtitle = "All villages are assigned a birthday and have one of six personality types: <span style='color:#855C75'>**Cranky**</span>, 
+       <span style='color:#D9AF6B'>**Jock**</span>, 
+       <span style='color:#AF6458'>**Lazy**</span>, 
+       <span style='color:#736F4C'>**Normal**</span>, 
+       <span style='color:#526A83'>**Peppy**</span>, 
+       <span style='color:#625377'>**Smug**</span>, 
+       <span style='color:#68855C'>**Snooty**</span>, and 
+       <span style='color:#7C7C7C'>**Uchi**</span>.")  +
+  theme(plot.title = element_markdown(face = "bold", 
+                                      size = 18, hjust = 0.5),
+        plot.subtitle = element_markdown(size = 12, hjust = 0.5),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(color = "grey"),
+        legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.y = element_text(size = 12, face = "bold"),
+        axis.text.x = element_blank(),
+        axis.ticks = element_blank())
+
+```
+
+```{r}
+ggsave("2020-09_animal_crossing_calendar.png",
+       plot = personality_calendar, 
+       path = here::here("outputs"),
+       width = 15, height = 9)
+
+```
