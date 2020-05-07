@@ -1,0 +1,109 @@
+---
+title: "2020-02_sftrees"
+author: "Ijeamaka Anyene"
+date: "1/29/2020"
+output: html_document
+---
+
+```{r packages, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(sf)
+library(patchwork)
+```
+
+```{r data}
+# Tree data from tidy tuesday
+sf_trees = readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-28/sf_trees.csv")
+
+# Neighborhoog polygons from DataSF
+paths = here::here("data", "Analysis Neighborhoods.geojson")
+
+sf_neighborhoods = st_read(paths) %>%
+  st_transform(crs = 4326) %>%
+  filter(nhood != "Treasure Island")
+
+neighborhoods_sp = as(sf_neighborhoods, "Spatial")
+```
+
+```{r clean}
+# Seperating species and common name
+common_name = data.frame(str_split(sf_trees$species, ":: ", simplify = TRUE),
+                         stringsAsFactors = FALSE)
+colnames(common_name) = c("species", "common_name")
+common_name$common_name[common_name$common_name == ""] = "Uncategorized"
+
+# For funsies checking how many unique common names there are
+length(unique(common_name$common_name))
+
+sf_trees$common_name = common_name$common_name
+
+# Finding top common names 
+sf_trees_top = sf_trees %>%
+  group_by(common_name) %>%
+  filter(common_name != "Uncategorized") %>%
+  summarise(counts = n()) %>%
+  top_n(9, counts) %>%
+  ungroup() 
+
+top_trees = sf_trees_top$common_name
+```
+
+```{r data clean}
+trees_top_9 = sf_trees %>%
+  filter(is.na(latitude) == FALSE, latitude >= 37.7,
+         common_name %in% top_trees) %>%
+  select(tree_id, common_name, latitude, longitude)
+```
+
+```{r main plot}
+common_trees_plot = ggplot() +
+  geom_polygon(data = neighborhoods_sp, aes(x = long, y = lat, group = group), 
+               colour = "black", fill = NA) +
+  geom_point(data = trees_top_9, aes(x = longitude, y = latitude, 
+                                     colour = as.factor(common_name)), size = 0.5) +
+  facet_wrap(~common_name, nrow = 3) +
+  labs(x = NULL, y = NULL,
+       title = paste0("The Most Common Tree Species\n", 
+                      "in San Francisco and their Locations"),
+       caption = paste0("Source: DataSF\n",
+                     "Visualization: Ijeamaka Anyene")) +
+  scale_color_manual(values = rep("#1a472a", 9)) + 
+  #scale_color_brewer(palette = "Paired", ) + 
+  theme( 
+    # Axis
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.line = element_blank(),
+    # Legends
+    legend.position = "none",
+    legend.background = element_rect(fill = "white"),
+    legend.direction = "horizontal",
+    # Panels
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    # Plots
+    plot.background = element_rect(fill = "white"),
+    plot.title = element_text(colour = "black", face = "bold", hjust = 0.5, size = 18),
+    plot.caption = element_text(colour = "black", face = "italic", size = 8),
+    # Strips
+    strip.background = element_rect(fill = "black"),
+    strip.text = element_text(colour = "#eeeeee", face = "bold", size = 12))
+
+common_trees_plot
+```
+
+
+```{r}
+ggsave(here::here("outputs", "2020-02_sftrees.png"), 
+       width = 10, height = 8)
+```
+
+
+
+
+

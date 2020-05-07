@@ -1,0 +1,120 @@
+---
+title: "2020-03"
+author: "Ijeamaka Anyene"
+date: "2/7/2020"
+output: html_document
+---
+
+```{r packages}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(patchwork)
+library(gghighlight)
+```
+
+```{r data}
+attendance = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/attendance.csv')
+
+games = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-02-04/games.csv')
+
+```
+
+```{r}
+hometeam_advantage = games %>%
+  mutate(week = as.numeric(week)) %>%
+  left_join(., attendance, by = c("home_team_name" ="team_name",
+                                                         "year" = "year",
+                                                         "week" = "week")) %>%
+  mutate(home_town_win = if_else(home_team == winner, "home_win", "home_loss")) %>%
+  select(year, team, home_team_city, home_team_name, home_town_win) %>%
+  group_by(home_team_name, home_town_win) %>%
+  summarise(counts = n()) %>%
+  spread(home_town_win, counts)
+```
+
+```{r}
+wins = games %>%
+  group_by(winner) %>%
+  summarise(total_wins = n()) %>%
+  mutate(team_name = stringr::word(winner, -1)) %>%
+  group_by(team_name) %>%
+  summarise(total_wins = sum(total_wins))
+
+total_games = attendance %>%
+  group_by(team_name) %>%
+  summarise(total_games = n())
+
+wins_losses = left_join(wins, total_games, by = c("team_name")) %>%
+  mutate(total_losses = total_games - total_wins)
+```
+
+```{r}
+hometeam_advantage = left_join(hometeam_advantage, wins_losses,
+                               by = c("home_team_name" = "team_name")) %>%
+  mutate(perc_wins = home_win / total_wins * 100,
+         perc_loss = home_loss / total_losses * 100)
+  
+```
+
+```{r}
+scatter_plot = hometeam_advantage %>%
+  ggplot(., aes(x = perc_loss, y = perc_wins, colour = home_team_name)) +
+  geom_point(size = 3) +
+  labs(y = "% of Home Wins / All Wins",
+         x = "% of Home Losses / All Losses") +
+  theme(
+    # Panels
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    # Plots
+    plot.background = element_rect(fill = "white"),
+    # Axis
+    axis.text.x = element_text(colour = "black"),
+    axis.text.y = element_text(colour = "black"),
+    axis.ticks.x =  element_line(colour = "black"),
+    axis.ticks.y = element_line(colour = "black"),
+    axis.line = element_line(colour = "black"),
+    # Legends
+    legend.position = "none")
+
+scatter_plot
+```
+
+```{r}
+bar_plot = hometeam_advantage %>%
+  ggplot(., aes(x = reorder(home_team_name, total_wins), y = total_wins, 
+                fill = home_team_name)) +
+  geom_col() +
+  labs(y = "Total Wins",
+         x = "Team Name") +
+  coord_flip() +
+  theme(
+    # Axis
+    legend.position = "none",
+    # Panels
+    panel.background = element_rect(fill = "white"),
+    panel.border = element_blank(),
+    panel.grid = element_blank()
+  )
+bar_plot
+```
+
+```{r}
+bar_plot + scatter_plot +
+  plot_annotation(title = "Home Field Advantage",
+                  subtitle = "Does playing a game at home give the team an advantage? \nNot exactly, the teams with the most wins do not win more during home games.",
+                  caption = paste0("Source:  Pro Football Reference\n",
+                     "Visualization: Ijeamaka Anyene"),
+                  theme = theme(plot.title = element_text(size = 24, 
+                                                          hjust = 0.5,
+                                                          face = "bold"),
+                                plot.subtitle = element_text(size = 16, 
+                                                             hjust = 0.5,
+                                                             face = "bold.italic"),
+                                plot.caption = element_text(face = "italic")
+                                ))
+
+ggsave(here::here("outputs", "2020-03_nfl_stadiums.png"), width = 14, height = 7)
+```
