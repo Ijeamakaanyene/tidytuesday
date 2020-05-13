@@ -1,6 +1,11 @@
 # Data Visualization 2020
 In 2020, I made the goal (not resolution) to re-explore/learn things for the sake of learning, so I am challenged myself to create one data visualization a week. This ended up being a bit too ambituous, and now it is as I get inspired. Here is to getting better at `ggplot`!
 
+<b> Dates: 05/10/2020 - 05/16/2020</b><br>
+Another TidyTuesday project! Created a timeline of volcanic erruptions within the United States. This used The Smithsonian Institution data.</br></br>
+![Volcanoes](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-10_volcano_erruptions.png)
+</br></br>
+
 <b> Dates: 05/03/2020 - 05/09/2020</b><br>
 A TidyTuesday project for a calendar of Animal Crossing personality types. This used the VillagerDB data.</br></br>
 ![Animal-crossing](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-09_animal_crossing_calendar.png)
