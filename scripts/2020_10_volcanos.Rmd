@@ -75,7 +75,7 @@ volcano_timeline = ggplot() +
        caption = paste0("Source: The Smithsonian Institution\n",
                      "Visualization: Ijeamaka Anyene | @ijeamaka_a")) +
   theme(plot.background = element_rect(fill = "#303030"),
-        plot.title = element_text(colour = "white", hjust = 0.5, face = "bold", size = 18),
+        plot.title = element_text(colour = "#fff4e6", hjust = 0.5, face = "bold", size = 18),
         plot.subtitle = element_text(colour = "#B3B3B3", hjust = 0.5, face = "bold", size = 14),
         plot.caption = element_text(colour = "#B3B3B3", size = 8),
         panel.border = element_blank(),
