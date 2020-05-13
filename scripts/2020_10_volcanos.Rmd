@@ -67,7 +67,7 @@ volcano_timeline = ggplot() +
   scale_fill_manual(values = rcartocolor::carto_pal(n = 7, name = "BrwnYl")) +
   guides(fill = guide_legend(nrow = 1,
                              label.position = "bottom", 
-                             keywidth = grid::unit(5, "lines"),
+                             keywidth = grid::unit(10, "lines"),
                              keyheight = grid::unit(1, "lines"))) +
   labs(x = NULL, y = NULL, fill = NULL,
        title = "A Timeline of Volcanic Activity Since 2000 within the United States and Associated Territories",
@@ -84,10 +84,10 @@ volcano_timeline = ggplot() +
         axis.text = element_text(colour = "#B3B3B3", face = "bold", size = 16),
         axis.text.y = element_blank(),
         legend.position = "bottom",
-        legend.text = element_text(colour = "#B3B3B3"),
+        legend.text = element_text(colour = "#B3B3B3", size = 12),
         legend.background = element_rect(fill = "#303030"),
         )
-
+volcano_timeline
 ```
 
 ```{r}
