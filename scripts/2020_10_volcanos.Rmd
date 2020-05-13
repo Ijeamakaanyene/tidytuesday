@@ -1,0 +1,101 @@
+---
+title: "2020_10_volcanoes"
+author: "Ijeamaka Anyene"
+date: "5/12/2020"
+output: html_document
+---
+
+```{r}
+volcano = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+eruptions = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(urbnmapr)
+```
+
+```{r}
+eruptions_merged = left_join(eruptions, select(volcano, volcano_number, country, subregion),
+                             by = c("volcano_number"="volcano_number")) %>%
+  filter(country == "United States") %>%
+  filter(is.na(vei) == FALSE) %>%
+  filter(start_year > 2000) %>%
+  mutate(combo_year = as.numeric(paste(start_year, start_month, sep = ".")))
+```
+
+```{r}
+# Using for loop to create data needed to plot a geom_polygon
+volcano_polygon_list = list()
+years = unlist(eruptions_merged$combo_year)
+volcano_ids = unlist(eruptions_merged$volcano_number)
+veis = unlist(eruptions_merged$vei)
+
+# There is most likely a better way of doing this.. but I cannot think of it!
+for(i in 1:length(years)){
+  volcano_polygon_df = data.frame(
+    x = c(years[i], years[i] + .25, years[i] + .5),
+    y = c(0, veis[i], 0),
+    t = rep(volcano_ids[i], 3)
+  )
+  
+  volcano_polygon_list[[i]] = volcano_polygon_df
+}
+```
+
+```{r}
+# Converting into df and adding subregion information
+volcano_polygon_df = volcano_polygon_list %>%
+  bind_rows() %>%
+  left_join(., select(eruptions_merged, volcano_number, subregion),
+            by = c("t" = "volcano_number"))
+```
+
+```{r}
+volcano_timeline = ggplot() +
+  geom_polygon(data = volcano_polygon_df, aes(x = x, y = y, group = t, fill = subregion),
+               alpha = 0.75, colour = "black") +
+  geom_segment(aes(y = 0, yend = 0, x = 2001, xend = 2021), 
+               size = 1,
+               colour = "black",
+               arrow = arrow()) +
+  scale_x_continuous(limits = c(2001, 2021),
+                     expand = c(0.005, 0.005)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_fill_manual(values = rcartocolor::carto_pal(n = 7, name = "BrwnYl")) +
+  guides(fill = guide_legend(nrow = 1,
+                             label.position = "bottom", 
+                             keywidth = grid::unit(5, "lines"),
+                             keyheight = grid::unit(1, "lines"))) +
+  labs(x = NULL, y = NULL, fill = NULL,
+       title = "A Timeline of Volcanic Activity Since 2000 within the United States and Associated Territories",
+       subtitle = "Each triangle's height represents the erruptions volcanic explosion index. \nVolcanic activity has been mostly occurring outside of the continental United States.",
+       caption = paste0("Source:  Axios\n",
+                     "Visualization: Ijeamaka Anyene | @ijeamaka_a")) +
+  theme(plot.background = element_rect(fill = "#303030"),
+        plot.title = element_text(colour = "white", hjust = 0.5, face = "bold", size = 18),
+        plot.subtitle = element_text(colour = "#B3B3B3", hjust = 0.5, face = "bold", size = 14),
+        plot.caption = element_text(colour = "#B3B3B3", size = 8),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text = element_text(colour = "#B3B3B3", face = "bold", size = 16),
+        axis.text.y = element_blank(),
+        legend.position = "bottom",
+        legend.text = element_text(colour = "#B3B3B3"),
+        legend.background = element_rect(fill = "#303030"),
+        )
+
+```
+
+```{r}
+ggsave(filename = "2020-10_volcano_erruptions.png", 
+       plot = volcano_timeline, 
+       device = "png", 
+       path = here::here("outputs"), 
+       width = 16, height = 7)
+
+```
+
