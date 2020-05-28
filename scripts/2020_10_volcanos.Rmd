@@ -71,7 +71,7 @@ volcano_timeline = ggplot() +
                              keyheight = grid::unit(1, "lines"))) +
   labs(x = NULL, y = NULL, fill = NULL,
        title = "A Timeline of Volcanic Activity Since 2000 within the United States and Associated Territories",
-       subtitle = "Each triangle's height represents the erruptions volcanic explosion index. \nVolcanic activity has been mostly occurring outside of the continental United States.",
+       subtitle = "Each triangle's height represents the eruptions volcanic explosion index. \nVolcanic activity has been mostly occurring outside of the continental United States.",
        caption = paste0("Source: The Smithsonian Institution\n",
                      "Visualization: Ijeamaka Anyene | @ijeamaka_a")) +
   theme(plot.background = element_rect(fill = "#303030"),
