@@ -1,0 +1,140 @@
+---
+title: "2020_11_cocktails"
+author: "Ijeamaka Anyene"
+date: "5/26/2020"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+```
+
+```{r}
+boston_cocktails = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv')
+```
+
+```{r}
+cocktails = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/cocktails.csv')
+
+```
+
+Bartender Measurement Conversion Used Here: https://en.wikibooks.org/wiki/Bartending/Glossary/Table_of_measures_and_conversions
+
+```{r}
+tequila_cocktails = boston_cocktails %>%
+  filter(category == "Tequila") %>%
+  filter(measure != "For glass") %>%
+  mutate(measure = case_when(
+    measure == "splash" ~ "0.2 oz",
+    measure == "1 1/2 oz" ~ "1.5 oz",
+    TRUE ~ measure)) %>%
+  mutate(measurement_value = stringr::str_extract(measure, "\\d+(\\.|\\/)*\\d*"))
+
+tequila_cocktails$measurement_mod = sapply(tequila_cocktails$measurement_value,
+                                           function(x) eval(parse(text=x)))
+```
+
+```{r}
+tequila_cocktails = tequila_cocktails %>%
+  mutate(ingredient_mod = case_when(
+    stringr::str_detect(ingredient, "(T|t)equila") ~ "Tequila",
+    stringr::str_detect(ingredient, "(T|t)equila") == FALSE ~ "Other")) %>%
+  group_by(row_id, name, ingredient_mod) %>%
+  summarise(measurement_mod = sum(measurement_mod)) %>%
+  ungroup() %>%
+  group_by(row_id) %>%
+  mutate(measurement_fraction = measurement_mod /
+           sum(measurement_mod, na.rm = TRUE),
+         ymax = cumsum(measurement_fraction),
+         ymin = c(0, head(ymax, n = -1)))
+
+```
+
+```{r}
+# LOL for some reason the bottom stopped working so manual here it is
+top_tequila_ids = c(890, 769, 905, 	787, 907)
+bottom_tequila_ids = c(813, 795, 931, 753, 939)
+
+#tequila_cocktails %>%
+  #filter(ingredient_mod == "Tequila") %>%
+  #top_n(n = 5, wt = measurement_fraction) #%>%
+  #select(row_id) %>%
+  #unlist()
+
+#tequila_cocktails %>%
+ # filter(ingredient_mod == "Tequila") %>%
+  #top_n(n = -5, wt = measurement_fraction) %>%
+  #select(row_id) %>%
+  #unlist()
+```
+
+```{r}
+top_bottom_tequila = tequila_cocktails %>%
+  ungroup() %>%
+  filter(row_id %in% c(top_tequila_ids, bottom_tequila_ids)) %>%
+  mutate(category = if_else(row_id %in% top_tequila_ids, "TOP", "BOTTOM"),
+         name = case_when(
+           name == "El Ni_o" ~ "El Nino", 
+           name == "Waiting On Summer" ~ "Waiting On\n Summer",
+           TRUE ~ name),
+         circle_label = if_else(ingredient_mod == "Tequila", 
+                           paste0(name, "\n", round(measurement_fraction * 100, 1), "%"),
+                           NA_character_)) %>%
+  mutate(fcts_name = forcats::fct_relevel(name, c("Shady Lady", "Spice Of Life", "El Nino", "Hairy Sunrise", "Waiting On\n Summer","Tequila Collins", "Mexican Monk", "Mexicola", "Tequonic", "Paloma")))
+
+```
+
+```{r}
+sysfonts::font_add_google("Staatliches", "Staatliches")
+```
+
+```{r}
+tequila_graph = top_bottom_tequila %>%
+  ggplot(., aes(xmax = 4, xmin = 3, 
+                ymax = ymax, ymin = ymin,
+                fill = ingredient_mod)) +
+  geom_rect() +
+  geom_text(aes(label = circle_label, x = 1, y = 0), 
+            color = "#eeeeee", fontface = "bold", family = "Tahoma") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c("#999999", "#ffbf00")) +
+  xlim(c(1, 4)) +
+  facet_wrap(~ category + fcts_name, 
+             nrow = 2) +
+  labs(title = "TEQUILA!",
+       subtitle = paste0("The Mr. Boston Bartender's Guide most and least tequila heavy drinks", 
+       "\ndetermined by the percentage of the total drink that is tequila."),
+        caption = paste0("Source: Kaggle\n",
+                     "Visualization: Ijeamaka Anyene | @ijeamaka_a")) +
+  theme(legend.position = "none",
+        plot.title = element_text(color = "#ffcf40", size = 18, 
+                                  face =  "bold", hjust = 0.5,
+                                  family = "Tahoma"),
+        plot.subtitle = element_text(color = "#aaaaaa", size = 14,
+                                     face = "bold", hjust = 0.5,
+                                     family = "Tahoma"),
+        plot.caption = element_text(color = "#aaaaaa", size = 8),
+        plot.background = element_rect(fill = "#303030"),
+        #plot.margin = grid::unit(c(0,0,0,0), "mm"),
+        panel.grid = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        strip.text = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
+
+tequila_graph
+```
+
+```{r}
+ggsave(filename = "2020-11_tequila_cocktails.png", 
+       plot = tequila_graph, 
+       device = "png", 
+       path = here::here("outputs"), 
+       width = 15, height = 9)
+```
+
+
