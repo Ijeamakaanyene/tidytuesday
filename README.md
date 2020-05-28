@@ -1,6 +1,11 @@
 # Data Visualization 2020
 In 2020, I made the goal (not resolution) to re-explore/learn things for the sake of learning, so I am challenged myself to create one data visualization a week. This ended up being a bit too ambituous, and now it is as I get inspired. Here is to getting better at `ggplot`!
 
+<b> Dates: 05/24/2020 - 05/30/2020</b><br>
+Again, TidyTuesday! Created doughnut plots of percentage of drink that is Tequila. This used Kaggle data.</br></br>
+![Cocktails](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-11_tequila_cocktails.png)
+</br></br>
+
 <b> Dates: 05/10/2020 - 05/16/2020</b><br>
 Another TidyTuesday project! Created a timeline of volcanic erruptions within the United States. This used The Smithsonian Institution data.</br></br>
 ![Volcanoes](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-10_volcano_erruptions.png)
