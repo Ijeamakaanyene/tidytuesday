@@ -1,0 +1,288 @@
+---
+title: "Astronauts"
+author: "Ijeamaka Anyene"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggtext)
+library(viridis)
+```
+
+```{r}
+astronauts = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-14/astronauts.csv')
+
+```
+
+```{r}
+total_hrs_mission = astronauts %>%
+  select(name,
+         total_hrs_sum) %>%
+  distinct() %>%
+  mutate(total_yrs = round(total_hrs_sum / 8760, 2),
+         yrs_cat = case_when(
+           total_yrs >= 0.00 & total_yrs < 0.5 ~ "yr_cat_1",
+           total_yrs >= 0.5 & total_yrs < 1.00 ~ "yr_cat_2",
+           total_yrs >= 1.00 & total_yrs < 1.50 ~ "yr_cat_3",
+           total_yrs >= 1.5 & total_yrs < 2 ~ "yr_cat_4",
+           total_yrs >= 2.00 & total_yrs < 3.00 ~ "yr_cat_5"
+         ))
+  
+  
+```
+
+```{r}
+first_name = stringr::str_extract_all(total_hrs_mission$name,
+                         "\\,[:space:].+",
+                         simplify = TRUE)
+
+first_name = stringr::str_remove_all(first_name,
+                                     "\\,[:space:]")
+
+last_name = stringr::str_extract_all(total_hrs_mission$name,
+                         ".+\\,",
+                         simplify = TRUE)
+
+last_name = stringr::str_remove_all(last_name,
+                                    "\\,")
+```
+
+```{r}
+points = 565
+
+golden_angle = 8 #pi * (3 - sqrt(5))
+
+t = (1:points) * golden_angle
+x = sin(t)
+y = cos(t)
+
+testing_spiral = tibble(t, x, y)
+```
+
+```{r}
+set.seed(123)
+
+total_hrs_mission = total_hrs_mission %>%
+  mutate(name_new = paste0(first_name, " ", last_name, "<br>",
+                           total_yrs, " years"),
+         name_new = case_when(
+           name_new == "NA NA" ~ NA_character_,
+           TRUE ~ name_new),
+         t = sample(testing_spiral$t,
+                    nrow(total_hrs_mission),
+                    replace = FALSE))  %>%
+  select(-name)
+```
+
+```{r}
+combined_spiral = left_join(testing_spiral, total_hrs_mission,
+                            by = c("t" = "t")) %>%
+  mutate(total_hrs_sum = case_when(
+    is.na(total_hrs_sum) == TRUE ~ 1,
+    TRUE ~ total_hrs_sum
+  )) %>%
+  mutate(top_astronauts = if_else(total_hrs_sum >= 15624.03,
+                                  "Top", "Bottom"))
+```
+
+```{r}
+top_astronauts = combined_spiral %>%
+  top_n(n = 10, wt = total_hrs_sum) %>%
+  mutate(
+    y = -5000,
+    x = seq(from = -4400, to = 4400, length.out = 10),
+    y_text = -5800,
+    x_text = x
+    )
+
+```
+
+```{r}
+star_palette = c("#dbdce1", "#97bbc7")
+```
+
+```{r}
+galaxy_plot = ggplot(combined_spiral) +
+  geom_point(aes(x*t, y*t, 
+                 size = total_yrs,
+                 color = top_astronauts)) +
+  geom_point(data = top_astronauts,
+             aes(x, y),
+             size = 4,
+             color = "#97bbc7") +
+  scale_color_manual(values = star_palette) +
+  labs(title = "Galaxy of Astronauts",
+       subtitle = paste0("Size of the star reflects the time of astronaut in space",
+       "\nand the astronauts that had the longest missions are highlighted")) +
+  geom_text(data = top_astronauts,
+            aes(x = x_text, y = y_text, label = name_new),
+            color = "#c5c5c5",
+            size = 4,
+            check_overlap = FALSE) +
+  theme(
+    legend.position = "none",
+    legend.background = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold",
+                              colour = "#275d85", size = 30),
+    plot.subtitle = element_text(hjust = 0.5, face = "bold",
+                              colour = "#9da5bd", size = 12),
+    plot.background = element_rect(fill = "#3a3a3a"),
+    panel.background = element_rect(fill = "#3a3a3a"),
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+    )
+
+galaxy_plot
+```
+
+```{r}
+ggsave(filename = "2020-12_astronauts_galaxy.png", 
+       plot = galaxy_plot, 
+       device = "png", 
+       path = here::here("outputs"), 
+       width = 15, height = 8.2)
+```
+
+
+```{r}
+star_v2_palette = c("#dbdce1", "#97bbc7", "#2348a3", "#46467a", "#fbc213")
+```
+
+```{r}
+legend_plot = tibble(
+  circle_size = c(0.00, 0.5, 1, 1.5, 2.0),
+  circle_label = c("yr_cat_1", "yr_cat_2", "yr_cat_3",
+                   "yr_cat_4", "yr_cat_5"),
+  x = c(-3200, -3100, -3000, -2900, -2800),
+  y = rep(-5400, 5)
+)
+```
+
+```{r}
+legend_vertical_segment = tibble(
+  x = legend_plot$x,
+  y = legend_plot$y,
+  xend = legend_plot$x,
+  yend = legend_plot$y + c(1400, -1400, 1000, -1000, 600)
+    #c(-4000, -6400, -4400, -6000, -4800)
+)
+```
+
+```{r}
+legend_horizontal_segment = tibble(
+  x = legend_vertical_segment$x,
+  y = legend_vertical_segment$yend,
+  xend = x + 200,
+  yend = legend_vertical_segment$yend
+)
+```
+
+```{r}
+legend_labels = tibble(
+  circle_label = c("< 0.5 year", "< 1 year", " < 1.5 year",
+                   "< 2 years", "< 2.5 years"),
+  x = legend_horizontal_segment$xend + 300,
+  y = legend_horizontal_segment$yend
+)
+
+```
+
+```{r}
+subtitle_textbox = tibble(
+  x = -4000,
+  y = -5200,
+  label = "<b style='font-size:14pt;color:#97bbc7'>Time in Space</b><br><br><span style = 'color:#dbdce1'>The size of the star is the total time spent in space for all 565 astronauts who participated in a space mission from 1961 to 2019.</span>"
+)
+
+```
+
+
+```{r}
+galaxy_plot_v2 = ggplot(combined_spiral) +
+  # Halo for the stars
+  geom_point(aes(x*t, y*t, 
+                 size = total_yrs + .75,
+                 color = yrs_cat,
+                 alpha = total_yrs)) +
+  
+  # Actual stars
+  geom_point(aes(x*t, y*t,
+                 size = total_yrs,
+                 color = yrs_cat)) +
+  
+  # Vertical lines for legend
+  geom_segment(data = legend_vertical_segment,
+               aes(x = x, y = y, xend = xend, yend = yend),
+               color = "#dbdce1") +
+  
+  # Horizontal lines for legend
+  geom_segment(data = legend_horizontal_segment, 
+               aes(x = x, y = y, xend = xend, yend = yend),
+               color = "#dbdce1") +
+  
+  # Time in space labels 
+  geom_text(data = legend_labels,
+            aes(x = x, y = y, label = circle_label),
+            color = "#dbdce1") +
+  
+  # Time in space legend circles
+  geom_point(data = legend_plot,
+             aes(x, y, 
+                 size = circle_size, 
+                 color = circle_label)) +
+  
+  # Time in space halo for legend circles
+  geom_point(data = legend_plot,
+             aes(x, y, 
+                 size = circle_size + .75, 
+                 color = circle_label,
+                 alpha = circle_size)) +
+  
+  # Subtitle text next to legend
+  geom_textbox(data = subtitle_textbox,
+               aes(x = x, y = y, label = label),
+               color = "#dbdce1",
+               fill = NA,
+               box.colour = NA) +
+  
+  # Everything else
+  scale_color_manual(values = star_v2_palette) +
+  labs(title = "Galaxy of Astronauts",
+       caption = paste0("Source: Corlett, Stavnichuk, and Komarova 2020\n",
+                     "Visualization: Ijeamaka Anyene | @ijeamaka_a")) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold",
+                              colour = "#efcd00", size = 30),
+    plot.caption = element_text(color = "#dbdce1", size = 10),
+    plot.background = element_rect(fill = "#202736"),
+    panel.background = element_rect(fill = "#202736"),
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()
+    )
+
+
+galaxy_plot_v2
+
+```
+
+
+```{r}
+ggsave(filename = "2020-12_astronauts_galaxy_version_2.png", 
+       plot = galaxy_plot_v2, 
+       device = "png", 
+       path = here::here("outputs"), 
+       width = 15, height = 8.2)
+```
+
+
+
+
+
