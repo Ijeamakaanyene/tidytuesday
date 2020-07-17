@@ -35,6 +35,8 @@ total_hrs_mission = astronauts %>%
 ```
 
 ```{r}
+# Extracting first and last name for cleaning
+
 first_name = stringr::str_extract_all(total_hrs_mission$name,
                          "\\,[:space:].+",
                          simplify = TRUE)
@@ -53,7 +55,7 @@ last_name = stringr::str_remove_all(last_name,
 ```{r}
 points = 565
 
-golden_angle = 8 #pi * (3 - sqrt(5))
+golden_angle = 8 #pi * (3 - sqrt(5)) orig golden angle formula
 
 t = (1:points) * golden_angle
 x = sin(t)
@@ -66,29 +68,34 @@ testing_spiral = tibble(t, x, y)
 set.seed(123)
 
 total_hrs_mission = total_hrs_mission %>%
-  mutate(name_new = paste0(first_name, " ", last_name, "<br>",
+  # Recombining names to be first name then last name w/ yrs in space
+  mutate(name_new = paste0(first_name, "\n", last_name, "\n",
                            total_yrs, " years"),
          name_new = case_when(
            name_new == "NA NA" ~ NA_character_,
            TRUE ~ name_new),
+         # Assigning ts to each astronaut for the spiral
          t = sample(testing_spiral$t,
                     nrow(total_hrs_mission),
                     replace = FALSE))  %>%
-  select(-name)
+  select(-name) #BYE!
 ```
 
 ```{r}
+# Joining spiral data with astronaut data 
 combined_spiral = left_join(testing_spiral, total_hrs_mission,
                             by = c("t" = "t")) %>%
   mutate(total_hrs_sum = case_when(
     is.na(total_hrs_sum) == TRUE ~ 1,
     TRUE ~ total_hrs_sum
   )) %>%
+  # Creating variable for astronauts with longest time in space for viz
   mutate(top_astronauts = if_else(total_hrs_sum >= 15624.03,
                                   "Top", "Bottom"))
 ```
 
 ```{r}
+# Top astronauts df for bottom of viz
 top_astronauts = combined_spiral %>%
   top_n(n = 10, wt = total_hrs_sum) %>%
   mutate(
@@ -106,9 +113,11 @@ star_palette = c("#dbdce1", "#97bbc7")
 
 ```{r}
 galaxy_plot = ggplot(combined_spiral) +
+  # Stars 
   geom_point(aes(x*t, y*t, 
                  size = total_yrs,
                  color = top_astronauts)) +
+  # Top astronauts at bottom
   geom_point(data = top_astronauts,
              aes(x, y),
              size = 4,
@@ -117,6 +126,7 @@ galaxy_plot = ggplot(combined_spiral) +
   labs(title = "Galaxy of Astronauts",
        subtitle = paste0("Size of the star reflects the time of astronaut in space",
        "\nand the astronauts that had the longest missions are highlighted")) +
+  # Labels for top astronaut
   geom_text(data = top_astronauts,
             aes(x = x_text, y = y_text, label = name_new),
             color = "#c5c5c5",
@@ -169,7 +179,6 @@ legend_vertical_segment = tibble(
   y = legend_plot$y,
   xend = legend_plot$x,
   yend = legend_plot$y + c(1400, -1400, 1000, -1000, 600)
-    #c(-4000, -6400, -4400, -6000, -4800)
 )
 ```
 
