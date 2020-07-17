@@ -1,6 +1,11 @@
 # Data Visualization 2020
 In 2020, I made the goal (not resolution) to re-explore/learn things for the sake of learning, so I am challenged myself to create one data visualization a week. This ended up being a bit too ambituous, and now it is as I get inspired. Here is to getting better at `ggplot`!
 
+<b> Dates: 07/12/2020 - 07/18/2020</b><br>
+Took a bit of a break because ...of 2020 things. I'm back again with a TidyTuesday! Tried to recreate the Milky Way where the "stars" are the cumulative number of years spent in space by each astronaut.</br></br>
+![Cocktails](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-12_astronauts_galaxy_version_2.png)
+</br></br>
+
 <b> Dates: 05/24/2020 - 05/30/2020</b><br>
 Again, TidyTuesday! Created doughnut plots of percentage of drink that is Tequila. This used Kaggle data.</br></br>
 ![Cocktails](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-11_tequila_cocktails.png)
