@@ -2,6 +2,12 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 07/19/2020 - 07/25/2020</b><br>
+<i> Output: 2020-12</i><br>
+Was slightly uninspired, so decided to use {ggforce} to create dog and cat paws.<br><br>
+![RSPCA](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-13_australian_animals.png)
+</br></br>
+
 <b> Dates: 07/12/2020 - 07/18/2020</b><br>
 <i> Output: 2020-12</i><br>
 Took a bit of a break because ...of 2020 things. I tried to recreate the Milky Way where the "stars" are the cumulative number of years spent in space by each astronaut.</br></br>
