@@ -1,0 +1,307 @@
+---
+title: "australian_animals"
+author: "Ijeamaka Anyene"
+date: "7/20/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggforce)
+library(patchwork)
+```
+
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+animal_outcomes = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-21/animal_outcomes.csv')
+```
+
+```{r}
+top_dogs_and_cats = animal_outcomes %>%
+  filter(animal_type %in% c("Dogs", "Cats")) %>%
+  group_by(year, animal_type) %>%
+  mutate(Total = sum(Total, na.rm = TRUE)) %>%
+  filter(outcome %in% c("Reclaimed", "Rehomed")) %>%
+  select(year, animal_type, Total) %>%
+  distinct() %>%
+  group_by(year) %>%
+  top_n(n = 1, wt = Total) %>%
+  mutate(label_totals = paste0(scales::comma(Total), " ", animal_type))
+```
+
+```{r}
+cat_paw_color = "#5e3c58"
+dog_paw_color = "#2e4045"
+```
+
+```{r}
+dog_geom = ggplot() +
+  geom_bspline_closed(data = tibble(
+    x = c(-2.5, -1.5, 0, 1.5, 2.5),
+    y = c(-5, -3, -1, -3, -5)),
+    aes(x = x, y = y),
+    fill = dog_paw_color) +
+  # FIRST CLAW
+  geom_ellipse(aes(x0 = -2.5, y0 = -2.5, 
+                   a = 1.25, b = .75, angle = 90),
+               fill = dog_paw_color,
+               colour = dog_paw_color) +
+  geom_shape(data = tibble(
+    x = c(-3.3, -3.3, -2.7),
+    y = c(-2, -1, -1.5)),
+    aes(x = x, y = y),
+    fill = dog_paw_color,
+    colour = dog_paw_color) +
+  # SECOND CLAW
+  geom_ellipse(aes(x0 = -1, y0 = -.5, 
+                   a = 1.25, b = .75, angle = 30),
+               fill = dog_paw_color,
+               colour = dog_paw_color) +
+  geom_shape(data = tibble(
+    x = c(-1.5, -1.4, -.9),
+    y = c(.5, 1.25, .5)),
+    aes(x = x, y = y),
+    fill = dog_paw_color,
+    colour = dog_paw_color) +
+  # THIRD CLAW
+  geom_ellipse(aes(x0 = .9, y0 = -.5, 
+                   a = 1.25, b = .75, angle = (pi / 2)),
+               fill = dog_paw_color,
+               colour = dog_paw_color) +
+  geom_shape(data = tibble(
+    x = c(.6, 1.1, 1.2),
+    y = c(.5, 1.25, .5)),
+    aes(x = x, y = y),
+    fill = dog_paw_color,
+    colour = dog_paw_color) +
+  # FOURTH CLAW
+  geom_ellipse(aes(x0 = 2.5, y0 = -2.5, 
+                   a = 1.25, b = .75, angle = 45),
+               fill = dog_paw_color,
+               colour = dog_paw_color) +
+  geom_shape(data = tibble(
+    x = c(3.3, 3.3, 2.7),
+    y = c(-2, -1, -1.5)),
+    aes(x = x, y = y),
+    fill = dog_paw_color,
+    colour = dog_paw_color) +
+  coord_fixed(xlim = c(-5, 5), ylim = c(-7, 2.5)) +
+  theme(panel.background = element_rect(fill = "#bfb5b2"),
+        #plot.background = element_rect(fill = "#bfb5b2"),
+        plot.margin = margin(0, 0, 0, 0, "pt"),
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+dog_geom
+```
+
+```{r}
+cat_geom = ggplot() +
+  geom_bspline_closed(data = tibble(
+    x = c(-2.5, -1.5, 0, 1.5, 2.5, 0),
+    y = c(-5, -3, -1, -3, -5, -4)),
+    aes(x = x, y = y),
+    fill = cat_paw_color) +
+  # FIRST CLAW
+  geom_ellipse(aes(x0 = -2.5, y0 = -2.5, 
+                   a = .75, b = .5, angle = 90),
+               fill = cat_paw_color,
+               colour = cat_paw_color) +
+  # SECOND CLAW
+  geom_ellipse(aes(x0 = -1, y0 = -.5, 
+                   a = .75, b = .5, angle = 30),
+               fill = cat_paw_color,
+               colour = cat_paw_color) +
+  # THIRD CLAW
+  geom_ellipse(aes(x0 = .9, y0 = -.5, 
+                   a = .75, b = .5, angle = (pi / 2)),
+               fill = cat_paw_color,
+               colour = cat_paw_color) +
+  # FOURTH CLAW
+  geom_ellipse(aes(x0 = 2.5, y0 = -2.5, 
+                   a = .75, b = .5, angle = 45),
+               fill = cat_paw_color,
+               colour = cat_paw_color) +
+  coord_fixed(xlim = c(-5, 5), ylim = c(-7, 2.5)) +
+  theme(panel.background = element_rect(fill = "#bfb5b2"),
+        plot.margin = margin(0, 0, 0, 0, "pt"), 
+        #plot.background = element_rect(fill = "#bfb5b2"),
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+```
+
+```{r}
+animal_geom_function = function(geom, label_year, label_text, year_font_size, label_font_size){
+  geom + 
+    geom_text(aes(x = 0, y = -3.5, label = label_year),
+              colour = "white", family = "Comfortaa", size = year_font_size) +
+    geom_segment(aes(x = -2.5, xend = 2.5,
+                     y = -5.2, yend = -5.2),
+                 size = 1,
+                 lineend = "round") +
+    geom_text(aes(x = 0, y = -6, label = label_text),
+              colour = "black", family = "Open Sans", fontface = "bold",
+              size = label_font_size)
+}
+```
+
+```{r}
+year_size = 10
+year_label = 7
+```
+
+```{r}
+geom_1999 = animal_geom_function(dog_geom, top_dogs_and_cats$year[1], 
+                                 top_dogs_and_cats$label_totals[1], year_size, 
+                                 year_label)
+
+geom_2000 = animal_geom_function(dog_geom, top_dogs_and_cats$year[2], 
+                                 top_dogs_and_cats$label_totals[2], year_size, 
+                                 year_label)
+
+geom_2001 = animal_geom_function(dog_geom, top_dogs_and_cats$year[3], 
+                                 top_dogs_and_cats$label_totals[3], year_size, 
+                                 year_label)
+
+geom_2002 = animal_geom_function(dog_geom, top_dogs_and_cats$year[4], 
+                                 top_dogs_and_cats$label_totals[4], year_size, 
+                                 year_label)
+
+geom_2003 = animal_geom_function(dog_geom, top_dogs_and_cats$year[5], 
+                                 top_dogs_and_cats$label_totals[5], year_size, 
+                                 year_label)
+```
+
+```{r}
+geom_2004 = animal_geom_function(dog_geom, top_dogs_and_cats$year[6], 
+                                 top_dogs_and_cats$label_totals[6], year_size, 
+                                 year_label)
+
+geom_2005 = animal_geom_function(dog_geom, top_dogs_and_cats$year[7], 
+                                 top_dogs_and_cats$label_totals[7], year_size, 
+                                 year_label)
+
+geom_2006 = animal_geom_function(dog_geom, top_dogs_and_cats$year[8], 
+                                 top_dogs_and_cats$label_totals[8], year_size, 
+                                 year_label)
+
+geom_2007 = animal_geom_function(dog_geom, top_dogs_and_cats$year[9], 
+                                 top_dogs_and_cats$label_totals[9], year_size, 
+                                 year_label)
+
+geom_2008 = animal_geom_function(dog_geom, top_dogs_and_cats$year[10], 
+                                 top_dogs_and_cats$label_totals[10], year_size, 
+                                 year_label)
+```
+
+```{r}
+geom_2009 = animal_geom_function(dog_geom, top_dogs_and_cats$year[11], 
+                                 top_dogs_and_cats$label_totals[11], year_size, 
+                                 year_label)
+
+geom_2010 = animal_geom_function(dog_geom, top_dogs_and_cats$year[12], 
+                                 top_dogs_and_cats$label_totals[12], year_size, 
+                                 year_label)
+
+geom_2011 = animal_geom_function(dog_geom, top_dogs_and_cats$year[13], 
+                                 top_dogs_and_cats$label_totals[13], year_size, 
+                                 year_label)
+```
+
+```{r}
+geom_2012 = animal_geom_function(cat_geom, top_dogs_and_cats$year[14], 
+                                 top_dogs_and_cats$label_totals[14], year_size, 
+                                 year_label)
+
+geom_2013 = animal_geom_function(cat_geom, top_dogs_and_cats$year[15], 
+                                 top_dogs_and_cats$label_totals[15], year_size, 
+                                 year_label)
+
+geom_2014 = animal_geom_function(cat_geom, top_dogs_and_cats$year[16], 
+                                 top_dogs_and_cats$label_totals[16], year_size, 
+                                 year_label)
+
+geom_2015 = animal_geom_function(cat_geom, top_dogs_and_cats$year[17], 
+                                 top_dogs_and_cats$label_totals[17], year_size, 
+                                 year_label)
+```
+
+```{r}
+geom_2016 = animal_geom_function(cat_geom, top_dogs_and_cats$year[18], 
+                                 top_dogs_and_cats$label_totals[18], year_size, 
+                                 year_label)
+
+geom_2017 = animal_geom_function(cat_geom, top_dogs_and_cats$year[19], 
+                                 top_dogs_and_cats$label_totals[19], year_size, 
+                                 year_label)
+```
+
+```{r}
+geom_2018 = animal_geom_function(cat_geom, top_dogs_and_cats$year[20], 
+                                 top_dogs_and_cats$label_totals[20], year_size, 
+                                 year_label) +
+  annotate("text", x = 2, y = -7, label = "Ijeamaka Anyene | @ijeamaka_a",
+           size = 5, colour = "black", )
+  
+#geom_2018
+```
+
+```{r}
+animal_plots_grid = geom_1999 + geom_2000 + geom_2001 + geom_2002 + geom_2003 + 
+  geom_2004 + geom_2005 + geom_2006 + geom_2007 + geom_2008 + geom_2009 + 
+  geom_2010 + geom_2011 + geom_2012 + geom_2013 + geom_2014 + geom_2015 + 
+  geom_2016 + geom_2017 + geom_2018 + plot_layout(ncol = 4)
+
+#animal_plots_grid
+```
+
+```{r}
+title_geom = ggplot() +
+  geom_text(aes(x = 0, y = 1, 
+                label = "Dogs vs. Cats"),
+            family = "Open Sans", 
+            fontface = "bold",
+            colour = "white",
+            size = 16) +
+  geom_text(aes(x = 0, y = -1, 
+                label = "Annual Top Reclaimed and Rehomed Animal at the RSPCA"),
+            family = "Open Sans", 
+            fontface = "bold",
+            colour = "white",
+            size = 12) +
+  coord_fixed(xlim = c(-30, 30), ylim = c(-2, 2)) +
+  theme(panel.background = element_rect(fill = "#2e4045"),
+        plot.margin = margin(0, 0, 0, 0, "pt"),
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+title_geom
+```
+
+```{r}
+complete_poster = title_geom + animal_plots_grid + plot_layout(ncol = 1)
+complete_poster
+```
+
+```{r}
+ggsave(filename = "2020-13_australian_animals.png", 
+       plot = complete_poster, 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 20, height = 25)
+```
+
+
+
