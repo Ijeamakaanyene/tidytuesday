@@ -130,7 +130,7 @@ island_xy %>%
   facet_wrap(~island_label, nrow = 1, 
              strip.position = "bottom") +
   
-  labs(title = "The Chonky Index: Palmer Penguins' Body Mass",
+  labs(title = "The Chonk Index: Palmer Penguins' Body Mass",
        subtitle = paste0("Each penguin represents the body mass of one the 342 Palmer penguins studied across\n", 
                          "three of the islands at the Palmer Archipelago in Antarctica.\n"),
        caption = paste0("Source: {palmerpenguins} by Gorman, Horst, and Hill | Visualization by @ijeamaka_a | Artwork by @allison_horst")) +
