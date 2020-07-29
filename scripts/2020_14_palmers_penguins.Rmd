@@ -1,0 +1,165 @@
+---
+title: "20202_14_palmers_penguins"
+author: "Ijeamaka Anyene"
+date: "7/27/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggimage)
+library(waffle)
+```
+
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+penguins.csv = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv')
+```
+
+
+```{r}
+island = penguins.csv %>%
+  select(island, species, body_mass_g)
+```
+
+```{r}
+img = c(here::here("data", "penguins", "gentoo.png"),
+        here::here("data", "penguins", "chinstrap.png"),
+        here::here("data", "penguins", "adelie.png"))
+```
+
+```{r}
+island = island %>%
+  mutate(images = if_else(species == "Adelie", img[3],
+                          if_else(species == "Chinstrap", img[2],
+                                  if_else(species == "Gentoo", img[1], ""))),
+         body_mass_scaled = body_mass_g / 100000 + .04) %>%
+  filter(is.na(body_mass_scaled) == FALSE) %>%
+  arrange(island)
+
+```
+
+```{r}
+island %>%
+  group_by(island, species) %>%
+  count()
+
+```
+
+```{r}
+x_biscoe = rep(seq(1, 10, by = .5), 9)
+x_biscoe = x_biscoe[-(168:171)]
+
+y_biscoe = rep(c(1, 2, 3, 4, 5, 6, 7, 8, 9), each = 19)
+y_biscoe = y_biscoe[-(168:171)]
+```
+
+```{r}
+x_dream = rep(seq(1, 10, by = .5), 7)
+x_dream = x_dream[-(125:133)]
+
+y_dream = rep(c(1, 2, 3, 4, 5, 6, 7), each = 19)
+y_dream = y_dream[-(125:133)]
+```
+
+```{r}
+x_torgersen = rep(seq(1, 10, by = .5), 3)
+x_torgersen = x_torgersen[-(52:57)]
+
+y_torgersen = rep(c(1, 2, 3), each = 19)
+y_torgersen = y_torgersen[-(52:57)]
+```
+
+```{r}
+island_xy = island %>%
+  mutate(x = c(x_biscoe, x_dream, x_torgersen),
+         y = c(y_biscoe, y_dream, y_torgersen),
+         island_label = case_when(
+           island == "Biscoe" ~ "Biscoe Island",
+           island == "Dream" ~ "Dream Island",
+           island == "Torgersen" ~ "Torgersen Island"))
+```
+
+
+```{r}
+legend_table = tibble(
+  island_label = rep("Torgersen Island", 3),
+  x = c(9, 8, 9),
+  y = c(8, 7, 6),
+  images = img
+)
+
+legend_text = tibble(
+  island_label = rep("Torgersen Island", 3),
+  species_label = c("Gentoo", "Chinstrap", "Adelie"),
+  x = c(7.8, 9.2, 8),
+  y = c(8, 7, 6)
+)
+
+legend_title = tibble(
+  island_label = c("Torgersen Island"),
+  label = "Penguin Identifying Kit",
+  x = 8,
+  y = 8.75
+)
+
+
+```
+
+```{r}
+island_xy %>%
+  ggplot() +
+  # Penguins!
+  geom_image(aes(x, y, image = images, size = I(body_mass_scaled))) +
+  # Penguins in legend
+  geom_image(data = legend_table,
+    aes(x, y, image = images), size = .09) +
+  # Text in legend
+  geom_text(data = legend_text,
+            aes(x, y, label = species_label),
+            family = "Open Sans") +
+  geom_text(data = legend_title,
+            aes(x, y , label = label),
+            family = "Open Sans",
+            fontface = "bold") +
+  # Everything else
+  facet_wrap(~island_label, nrow = 1, 
+             strip.position = "bottom") +
+  
+  labs(title = "The Chonky Index: Palmer Penguins' Body Mass",
+       subtitle = paste0("Each penguin represents the body mass of one the 342 Palmer penguins studied across\n", 
+                         "three of the islands at the Palmer Archipelago in Antarctica.\n"),
+       caption = paste0("Source: {palmerpenguins} by Gorman, Horst, and Hill | Visualization by @ijeamaka_a | Artwork by @allison_horst")) +
+  theme(plot.background = element_blank(),
+        panel.background = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        strip.background = element_rect(fill = "black"),
+        axis.title = element_blank(),
+        plot.title = element_text(family = "Ubuntu", size = 30,
+                                   color = "black", face = "bold",
+                                   hjust = 0.5),
+        plot.subtitle = element_text(family = "Open Sans", size = 18,
+                                    color = "black", hjust = 0.5),
+        strip.text = element_text(family = "Ubuntu", face = "bold", size = 16,
+                                  colour = "white"))
+
+```
+
+
+
+
+
+```{r}
+ggsave(filename = "2020-14_palmer_penguins.png", 
+       plot = last_plot(), 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 15, height = 9)
+
+```
