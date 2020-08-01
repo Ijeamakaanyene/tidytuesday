@@ -2,8 +2,14 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 07/26/2020 - 07/31/2020</b><br>
+<i> Output: 2020-14</i><br>
+Used ggimage to create pictograms<br><br>
+![Palmer](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-14_palmer_penguins.png)
+</br></br>
+
 <b> Dates: 07/19/2020 - 07/25/2020</b><br>
-<i> Output: 2020-12</i><br>
+<i> Output: 2020-13</i><br>
 Was slightly uninspired, so decided to use {ggforce} to create dog and cat paws.<br><br>
 ![RSPCA](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-13_australian_animals.png)
 </br></br>
