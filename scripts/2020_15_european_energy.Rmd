@@ -35,7 +35,7 @@ mod_country_totals = country_totals %>%
 
 ```{r}
 offset_term = 10000
-arrow_offset = 12000
+arrow_offset = 22000
 
 ggplot() +
   # Bottom Line
@@ -69,12 +69,15 @@ ggplot() +
              size = 4.5,
              colour = "#22773f",
              fill = "#22773f") +
+  # Scales
+  expand_limits(x = 0, y = 0) +
+  scale_x_continuous(limits = c(0, 5), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 100000), expand = c(0, 0)) +
+  
   # Everything Else
   labs(title = "European Energy", 
        subtitle = "Each countries' <span style = 'color:#bd645e;'>imports</span> and <span style = 'color:#22773f;'>exports</span> <br>of energy (GWh) in 2018",
        caption = "Source: Eurostat | Visualization by @ijeamaka_a") +
-  scale_x_continuous(limits = c(0, 5)) +
-  scale_y_continuous(limits = c(0, 100000)) +
   facet_wrap(~country_name, ncol = 5,
              strip.position = "bottom") +
   theme(plot.background = element_rect(fill = "#303030"),
@@ -99,7 +102,7 @@ ggplot() +
 
 
 ```{r}
-ggsave(filename = "2020-15_european_energy.png", 
+ggsave(filename = "2020-15_european_energy_test2.png", 
        plot = last_plot(), 
        device = "png",
        type = "cairo",
