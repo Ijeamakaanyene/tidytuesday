@@ -34,8 +34,8 @@ mod_country_totals = country_totals %>%
 ```
 
 ```{r}
-offset_term = 8000
-arrow_offset = 9000
+offset_term = 10000
+arrow_offset = 12000
 
 ggplot() +
   # Bottom Line
@@ -91,7 +91,7 @@ ggplot() +
         axis.text = element_blank(),
         axis.ticks = element_blank(),
         strip.text = element_text(family = "Oswald", 
-                                  size = 14, colour = "white"),
+                                  size = 16, colour = "white"),
         strip.background = element_rect(fill = "#303030", 
                                         colour = "#303030"))
 ```
