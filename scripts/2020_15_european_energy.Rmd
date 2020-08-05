@@ -1,0 +1,109 @@
+---
+title: "2020_15_energy"
+author: "Ijeamaka Anyene"
+date: "8/3/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggtext)
+```
+
+```{r}
+energy_types = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/energy_types.csv')
+country_totals = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-04/country_totals.csv')
+
+```
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+mod_country_totals = country_totals %>%
+  filter(type %in% c("Imports", "Exports")) %>%
+  select(-c(level, `2016`, `2017`)) %>%
+  mutate(country_name = case_when(
+    is.na(country_name) == TRUE ~ "United Kingdom",
+    country_name == "Bosnia & Herzegovina" ~ "Bosnia & \nHerzegovina",
+    country_name == "North Macedonia" ~ "North \nMacedonia",
+    TRUE ~ country_name)) %>%
+  mutate(x = rep(c(2, 3), 37))
+
+```
+
+```{r}
+offset_term = 8000
+arrow_offset = 9000
+
+ggplot() +
+  # Bottom Line
+  geom_segment(data = mod_country_totals,
+               aes(x = 1, xend = 4,
+                   y = 0, yend = 0),
+               colour = "white") +
+  # Import Arrow
+  geom_segment(data = filter(mod_country_totals, type == "Imports"),
+               aes(x = x, xend = x,
+                   yend = offset_term, y = `2018`+offset_term), 
+               colour = "#bd645e",
+               size = 3.25,
+               lineend =  "square") +
+  geom_point(data = filter(mod_country_totals, type == "Imports"),
+             aes(x = x, y = arrow_offset), 
+             shape = 25,
+             size = 4.5,
+             colour = "#bd645e",
+             fill = "#bd645e") +
+  # Export Arrow
+  geom_segment(data = filter(mod_country_totals, type == "Exports"),
+               aes(x = x, xend = x,
+                   y = offset_term, yend = `2018`+offset_term), 
+               colour = "#22773f",
+               size = 3.25,
+               lineend =  "square") +
+  geom_point(data = filter(mod_country_totals, type == "Exports"),
+             aes(x = x, y = `2018`+arrow_offset), 
+             shape = 24,
+             size = 4.5,
+             colour = "#22773f",
+             fill = "#22773f") +
+  # Everything Else
+  labs(title = "European Energy", 
+       subtitle = "Each countries' <span style = 'color:#bd645e;'>imports</span> and <span style = 'color:#22773f;'>exports</span> <br>of energy (GWh) in 2018",
+       caption = "Source: Eurostat | Visualization by @ijeamaka_a") +
+  scale_x_continuous(limits = c(0, 5)) +
+  scale_y_continuous(limits = c(0, 100000)) +
+  facet_wrap(~country_name, ncol = 5,
+             strip.position = "bottom") +
+  theme(plot.background = element_rect(fill = "#303030"),
+        plot.title = element_text(family = "Open Sans SemiBold",
+                                  size = 30, hjust = 0.5,
+                                  colour = "white"),
+        plot.subtitle = element_markdown(family = "Open Sans SemiBold",
+                                         size = 20, hjust = 0.5,
+                                         colour = "white"),
+        plot.caption = element_text(colour = "grey"),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        strip.text = element_text(family = "Oswald", 
+                                  size = 14, colour = "white"),
+        strip.background = element_rect(fill = "#303030", 
+                                        colour = "#303030"))
+```
+
+
+
+```{r}
+ggsave(filename = "2020-15_european_energy.png", 
+       plot = last_plot(), 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 9, height = 15)
+
+```
