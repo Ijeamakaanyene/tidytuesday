@@ -2,6 +2,13 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 08/02/2020 - 08/08/2020</b><br>
+<i> Output: 2020-15</i><br>
+Creating imports and exports of europen energy<br><br>
+![European-Energy](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-15_european_energy.png)
+</br></br>
+
+
 <b> Dates: 07/26/2020 - 07/31/2020</b><br>
 <i> Output: 2020-14</i><br>
 Used ggimage to create pictograms<br><br>
