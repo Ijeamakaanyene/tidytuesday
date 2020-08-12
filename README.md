@@ -2,6 +2,12 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 08/09/2020 - 08/15/2020</b><br>
+<i> Output: 2020-16</i><br>
+Showing the character who discussed Appa the most each episode<br><br>
+![Avatar](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-16_avatar.png)
+</br></br>
+
 <b> Dates: 08/02/2020 - 08/08/2020</b><br>
 <i> Output: 2020-15</i><br>
 Creating imports and exports of europen energy<br><br>
