@@ -1,0 +1,178 @@
+---
+title: "2020_16_avatar"
+author: "Ijeamaka Anyene"
+date: "8/10/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggimage)
+library(patchwork)
+```
+
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+avatar = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv')
+
+scene_description = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/scene_description.csv')
+
+```
+```{r}
+img = c(here::here("data", "avatar", "earth_element.png"),
+        here::here("data", "avatar", "fire_element.png"),
+        here::here("data", "avatar", "water_element.png"))
+```
+
+```{r}
+book_chapter = avatar %>%
+  select(book_num, chapter_num) %>%
+  unique() %>%
+  mutate(chapter_seq = 1:61, 
+         mention_max = rep(15, 61),
+         images = if_else(book_num == 1, img[3],
+                          if_else(book_num == 2, img[1],
+                                  if_else(book_num == 3, img[2], "None"))))
+```
+
+```{r}
+appa_data = avatar %>%
+  mutate(appa_mentions = stringr::str_count(full_text,
+                                            "Appa")) %>%
+  group_by(book_num, chapter_num, character) %>%
+  summarise(appa_mentions_sum = sum(appa_mentions, na.rm = TRUE)) %>%
+  filter(character != "Scene Description") %>%
+  group_by(book_num, chapter_num) %>%
+  top_n(n = 1, wt = appa_mentions_sum) %>%
+  filter(appa_mentions_sum > 0)
+```
+
+```{r}
+appa_data_merged = 
+  left_join(book_chapter, appa_data,
+                             by = c("book_num" = "book_num",
+                                    "chapter_num" = "chapter_num")) %>%
+  mutate(appa_mentions_sum = case_when(
+    is.na(appa_mentions_sum) == TRUE ~ as.double(0),
+    is.na(appa_mentions_sum) == FALSE ~ as.double(appa_mentions_sum)),
+    character = case_when(
+      is.na(character) == TRUE ~ "None",
+      TRUE ~ character),
+    duplicate_episode = duplicated(chapter_seq)) 
+```
+
+```{r}
+# Combining names where there are duplicates
+appa_data_merged$character[2] = "Aang & Katara"
+appa_data_merged$character[13] = "Aang & Sokka"
+appa_data_merged$character[35] = "Katara & Sokka"
+appa_data_merged$character[55] = "Aang & Zuko"
+appa_data_merged$character[59] = "Katara & Zuko"
+appa_data_merged$character[65] = "Katara & Zuko"
+```
+
+```{r}
+appa_data_merged = appa_data_merged %>%
+  filter(duplicate_episode == FALSE)
+```
+
+```{r}
+number_of_bar = nrow(appa_data_merged)
+id = seq(1:number_of_bar)
+angle = 90 - 360 * (id) / number_of_bar
+appa_data_merged$angle = ifelse(angle < -90, angle+180, angle)
+```
+
+```{r}
+appa_img = c(here::here("data", "avatar", "appa.png"))
+```
+
+
+```{r}
+appa_plot = 
+ggplot() +
+  # Each chapter as a segment
+  geom_segment(data = appa_data_merged,
+               aes(x = chapter_seq,
+                   xend = chapter_seq,
+                   y = 0,
+                   yend = appa_mentions_sum),
+               size = 0.75) +
+  # Adding dagged lines post segment
+  geom_segment(data = appa_data_merged,
+               aes(x = chapter_seq,
+                   xend = chapter_seq,
+                   y = appa_mentions_sum,
+                   yend = mention_max), 
+               linetype = "dotted",
+               size = 1) +
+  # Element icon to indicate a book
+  geom_image(data = appa_data_merged,
+             aes(x = chapter_seq,
+                 y = 15 + 2, 
+                 image = images),
+             size = 0.03) +
+  # Character names
+  geom_text(data = appa_data_merged, 
+            aes(x = chapter_seq,
+                y = 30, 
+                label = paste0(character, " ", book_num, ".",
+                               chapter_num),
+                angle = angle),
+            size = 6.5, 
+            family = "Lora") +
+  # Adding inner circle line
+  geom_segment(data = NULL,
+               aes(x = 0, 
+                   xend = 61,
+                   y = 0,
+                   yend = 0),
+               size = 1) +
+  # Appa Image
+  geom_image(data = tibble(x = 30, y = -15, icon = appa_img),
+             aes(x = x, y = y, image = icon),
+             size = .25) +
+  # Turning graph into circle
+  ylim(-15,35) +
+  coord_polar(start = 0) +
+  
+  # Everything else
+  labs(title = "\nAppa: The True Hero of Avatar",
+       subtitle = paste0("The character who most discusses Appa each episode", 
+                         "\nis displayed with the book and chapter noted."),
+       caption = paste0("Source: {appa} by Avery Robbins |", 
+       " Appa: SadiesVinyl on Etsy |", 
+       " Symbols: Howie62 on DeviantArt |", 
+       " Visualization by @ijeamaka_a")) +
+  theme(panel.background = element_rect(fill = "#e1d2c0"),
+        plot.background = element_rect(fill = "#e1d2c0", 
+                                       colour = "#0f0d0d", 
+                                       size = 4),
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, family = "Lora",
+                                  face = "bold", size = 40),
+        plot.subtitle = element_text(hjust = 0.5, family = "Lora",
+                                     size = 25),
+        plot.caption = element_text(size = 12),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())
+
+appa_plot
+```
+
+```{r}
+ggsave(filename = "2020-16_avatar.png", 
+       plot = appa_plot, 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 13, height = 15)
+```
+
+
+

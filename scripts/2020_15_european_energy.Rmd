@@ -34,8 +34,11 @@ mod_country_totals = country_totals %>%
 ```
 
 ```{r}
-offset_term = 10000
-arrow_offset = 22000
+export_segment = 10000
+export_arrow = 24000
+
+import_arrow = 15000
+import_segment = 29000
 
 ggplot() +
   # Bottom Line
@@ -43,28 +46,29 @@ ggplot() +
                aes(x = 1, xend = 4,
                    y = 0, yend = 0),
                colour = "white") +
-  # Import Arrow
+  # Import Segment and Arrow
   geom_segment(data = filter(mod_country_totals, type == "Imports"),
                aes(x = x, xend = x,
-                   yend = offset_term, y = `2018`+offset_term), 
+                   y = import_segment, yend = `2018`+ import_segment), 
                colour = "#bd645e",
                size = 3.25,
                lineend =  "square") +
   geom_point(data = filter(mod_country_totals, type == "Imports"),
-             aes(x = x, y = arrow_offset), 
+             aes(x = x, y = import_arrow), 
              shape = 25,
              size = 4.5,
              colour = "#bd645e",
              fill = "#bd645e") +
-  # Export Arrow
+  
+  # Export Segment and Arrow
   geom_segment(data = filter(mod_country_totals, type == "Exports"),
                aes(x = x, xend = x,
-                   y = offset_term, yend = `2018`+offset_term), 
+                   y = export_segment, yend = `2018`+ export_segment), 
                colour = "#22773f",
                size = 3.25,
                lineend =  "square") +
   geom_point(data = filter(mod_country_totals, type == "Exports"),
-             aes(x = x, y = `2018`+arrow_offset), 
+             aes(x = x, y = `2018`+ export_arrow), 
              shape = 24,
              size = 4.5,
              colour = "#22773f",
@@ -72,7 +76,7 @@ ggplot() +
   # Scales
   expand_limits(x = 0, y = 0) +
   scale_x_continuous(limits = c(0, 5), expand = c(0, 0)) +
-  scale_y_continuous(limits = c(0, 100000), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 120000), expand = c(0, 0)) +
   
   # Everything Else
   labs(title = "European Energy", 
@@ -102,7 +106,7 @@ ggplot() +
 
 
 ```{r}
-ggsave(filename = "2020-15_european_energy_test2.png", 
+ggsave(filename = "2020-15_european_energy.png", 
        plot = last_plot(), 
        device = "png",
        type = "cairo",
