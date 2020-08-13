@@ -119,7 +119,7 @@ ggplot() +
   # Character names
   geom_text(data = appa_data_merged, 
             aes(x = chapter_seq,
-                y = 30, 
+                y = 31, 
                 label = paste0(character, " ", book_num, ".",
                                chapter_num),
                 angle = angle),
@@ -141,7 +141,7 @@ ggplot() +
   coord_polar(start = 0) +
   
   # Everything else
-  labs(title = "\nAppa: The True Hero of Avatar",
+  labs(title = "\nAppa: The Underdiscussed Hero of Avatar",
        subtitle = paste0("The character who most discusses Appa each episode", 
                          "\nis displayed with the book and chapter noted."),
        caption = paste0("Source: {appa} by Avery Robbins |", 
