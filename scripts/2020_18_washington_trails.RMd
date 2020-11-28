@@ -1,0 +1,158 @@
+---
+title: "washington_trails"
+author: "Ijeamaka Anyene"
+date: "11/26/2020"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(tidyr)
+library(ggtext)
+library(ggimage)
+```
+
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+hike_data = readr::read_rds(url('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-11-24/hike_data.rds'))
+```
+
+```{r}
+top_hikes = hike_data %>%
+  filter(rating == "5.00")
+```
+
+```{r}
+feature_split = top_hikes %>%
+  select(features) %>%
+  unlist() %>%
+  unique()
+```
+
+```{r}
+top_list = list()
+
+for(i in 1:length(feature_split)){
+  top_list[[i]] = sum(str_count(top_hikes$features, 
+                      feature_split[i]))
+}
+
+names(top_list) = feature_split
+```
+
+```{r}
+img = c(
+  here::here("data", "washington_hikes", "dog.png"),
+  here::here("data", "washington_hikes", "flowers.png"),
+  here::here("data", "washington_hikes", "kids.png"),
+  here::here("data", "washington_hikes", "mountain.png"),
+  here::here("data", "washington_hikes", "ridge.png"),
+  here::here("data", "washington_hikes", "summits.png")
+)
+```
+
+```{r}
+df_top_list = t(data.frame(top_list)) %>%
+  as_tibble() %>%
+  mutate(feature_name = row.names(.),
+         feature_name_clean = feature_split,
+         count = as.numeric(top_list),
+         percentage = round(count / 68 * 100, 0)) %>%
+  arrange(-count) %>%
+  slice(1:6) %>%
+  select(feature_name_clean, count, percentage) %>%
+  mutate(images = c(img[4], img[1], img[2],
+                    img[5], img[3], img[6]),
+         label_name = paste0(feature_name_clean, "\n", count, " Trails"))
+
+df_top_list$label_name = forcats::fct_reorder(df_top_list$label_name, df_top_list$percentage)
+```
+
+```{r}
+df_top_list %>%
+  ggplot() +
+  # Feature image
+  geom_image(aes(x = 50, 
+                 y = 0, 
+                 image = images),
+             size = .5) +
+  # Percentage
+  geom_text(aes(x = percentage + 2.5, 
+                y = 150,
+                label = paste0(percentage, "%")),
+            size = 4) +
+  # Thick line
+  geom_segment(aes(x = 0, 
+                   xend = percentage, 
+                   y = 150, 
+                   yend = 150,
+                   color = feature_name_clean),
+               lineend = "round", 
+               linejoin = "mitre",
+               size  = 3) + 
+  # Dashed line
+  geom_segment(aes(x = percentage + 5, 
+                   xend = 100, 
+                   y = 150, 
+                   yend = 150,
+                   color = feature_name_clean),
+               lineend = "round", 
+               linejoin = "mitre", 
+               linetype = "dotted",
+               size = .5) +
+  labs(title = "\nWashington Trails Top Features",
+       subtitle = "The most frequent features in the sixty-eight five star trails",
+       caption = paste0("Source: Washington Trails Associations | See GitHub for Icons | Visualization by @ijeamaka_a")) +
+  xlim(0, 100) +
+  ylim(0, 175) +
+  scale_color_manual(
+    values = c("#052522", "#052522", 
+               "#052522", "#385132", 
+               "#5f3a34", "#230801")) +
+  coord_polar() +
+  facet_wrap(~label_name, 
+             strip.position = "bottom") +
+  theme(
+        plot.title = element_text(family = "Ubuntu", 
+                                  face = "bold",
+                                  size = 40, 
+                                  hjust = 0.5),
+        plot.subtitle = element_text(family = "Ubuntu", 
+                                     size = 20,
+                                     hjust = 0.5),
+        plot.caption = element_text(family = "Ubuntu", 
+                                    size = 8),
+        legend.position = "none",
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(family = "Oswald", 
+                                  face = "bold", 
+                                  size = 25),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill = "#f9f9f9"),
+        plot.background = element_rect(fill = "#f9f9f9"))
+
+
+```
+
+```{r}
+ggsave(filename = "2020-18_trails.pdf", 
+       plot = last_plot(), 
+       device = "pdf",
+       path = here::here("outputs"), 
+       width = 10, height = 10)
+```
+
+*Icon Credit*
+Mountain by icon 54 from the Noun Project
+Grass & Flower by Hamish from the Noun Project
+Mountain by kareemov from the Noun Project
+Children by Lee Mette from the Noun Project
+summit by Beau Wingfield from the Noun Project
