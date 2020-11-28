@@ -82,7 +82,7 @@ df_top_list %>%
                  image = images),
              size = .5) +
   # Percentage
-  geom_text(aes(x = percentage + 2.5, 
+  geom_text(aes(x = percentage + 2.8, 
                 y = 150,
                 label = paste0(percentage, "%")),
             size = 4) +
@@ -105,8 +105,8 @@ df_top_list %>%
                linejoin = "mitre", 
                linetype = "dotted",
                size = .5) +
-  labs(title = "\nWashington Trails Top Features",
-       subtitle = "The most frequent features in the sixty-eight five star trails",
+  labs(title = "\nWhat Makes a Five Star Trail?",
+       subtitle = "The most frequent features in the sixty-eight five star Washington trails",
        caption = paste0("Source: Washington Trails Associations | See GitHub for Icons | Visualization by @ijeamaka_a")) +
   xlim(0, 100) +
   ylim(0, 175) +

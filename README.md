@@ -2,6 +2,12 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 11/22/2020 - 11/28/2020 </b><br>
+<i> Output: 2020-18</i><br>
+Top features of top washington trails<br><br>
+![Washington-trails](https://raw.githubusercontent.com/Ijeamakaanyene/data_visualizations/master/outputs/2020-18_trails.pdf)
+</br></br>
+
 <b> Dates: 08/16/2020 - 08/23/2020 </b><br>
 <i> Output: 2020-17</i><br>
 IUN declared extinct plants in Africa<br><br>
