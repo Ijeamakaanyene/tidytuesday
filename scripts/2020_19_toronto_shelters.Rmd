@@ -1,0 +1,201 @@
+---
+title: "Toronto Shelters"
+author: "Ijeamaka Anyene"
+date: "11/30/2020"
+output: html_document
+---
+
+```{r libraries}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(glue)
+library(patchwork)
+library(ggtext)
+```
+
+```{r tidytuesday_data}
+tuesdata = tidytuesdayR::tt_load(2020, week = 49)
+shelters = tuesdata$shelters
+```
+
+```{r cleaned_data}
+cleaned_shelters = shelters %>%
+  filter(capacity > 0) %>%
+  mutate(
+    occupancy_date = floor_date(occupancy_date, "month"),    
+    occupancy_rate = occupancy / capacity,
+    year = year(occupancy_date),
+    month = month(occupancy_date, label = TRUE),
+    id_var = as.numeric(stringr::str_remove_all(occupancy_date, "-")),
+    year_month = glue("{month} {year}")
+         ) %>%
+  group_by(id_var, year_month, sector) %>%
+  summarise(avg_occupancy_rate = mean(occupancy_rate, na.rm = TRUE)) %>%
+  filter(avg_occupancy_rate <= .95)
+
+cleaned_shelters$year_month = forcats::fct_reorder(cleaned_shelters$year_month, 
+                                                   cleaned_shelters$id_var)
+```
+
+```{r house_polygon}
+sector_polygon = tibble(
+  x = c(-2, -2, 0, 2, 2),
+  xend = c(-2, 0, 2, 2, -2),
+  y = c(0, 1.5, 3, 1.5, 0),
+  yend = c(1.5, 3, 1.5, 0, 0),
+  sector = c("Co-ed", "Families", "Men", "Women", "Youth")
+)
+```
+
+```{r background_polygon}
+background_polygon = sector_polygon %>%
+  select(-sector)
+```
+
+```{r plot_data}
+combined_data = left_join(cleaned_shelters, sector_polygon,
+                          by = c("sector"="sector"))
+
+```
+
+```{r color_palette}
+palette_values = c("#613318", "#d57500", 
+                   "#ae431f", "#668d3c",
+                   "#4e6172")
+```
+
+```{r}
+legend_tibble = tibble(
+  sector = c("Co-ed", "Families", "Men", "Women", "Youth"),
+  x = c(2, 2, 2, 2, 2),
+  xend = c(9, 8, 7, 6, 5),
+  y = c(-.5, 0, .5, 1, 1.5),
+  yend = c(-.5, 0, .5, 1, 1.5)
+)
+```
+
+```{r}
+plot_legend = 
+  ggplot() +
+  # Title + subtitle
+  annotate("text", 
+           x = -12,
+           y = 2.5,
+          label = "Toronto Shelters", 
+          family = "Roboto Condensed",
+          fontface = "bold",
+          size = 7,
+          hjust = 0) +
+  annotate("text",
+           x = -12,
+           y = .5,
+           label = paste0(
+             "From 2017 - 2019, Toronto shelters were often exceeding or at\n", 
+             "maximum capacity. For each month, the sides of the house that are\n", 
+             "visible represent whether shelters in the sector were at less than\n",
+             "95% capacity."),
+           family = "Roboto Condensed Light",
+           size = 3,
+           hjust = 0) +
+  # Legend Lines description
+  geom_segment(data = legend_tibble,
+               mapping = aes(x = x, 
+                             xend = xend,
+                             y = y, 
+                             yend = yend,
+                             color = sector),
+                size = 2,
+                lineend = "round", 
+                linejoin = "mitre") +
+  # Legend lines labels
+  geom_text(data = legend_tibble,
+            mapping = aes(x = xend + 1, 
+                          y = y,
+                          label = sector, 
+                          color = sector),
+            fontface = "bold",
+            family = "Roboto Condensed Light",
+            size = 2.5) +
+  # Errything else
+  scale_color_manual(
+     values = palette_values) +
+  scale_x_continuous(limits = c(-12, 12)) +
+  scale_y_continuous(limits = c(-1, 3)) +
+  coord_fixed() +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    axis.ticks = element_blank(),
+    plot.background = element_rect(fill = "#f9f9f9"),
+    panel.background = element_rect(fill = "#f9f9f9"),
+    panel.grid = element_blank()) 
+
+plot_legend
+  
+```
+
+```{r}
+plot_body = 
+  ggplot(data = combined_data) +
+  # Background grey polygon
+  geom_segment(data = background_polygon,
+               mapping = aes(x = x, xend = xend,
+                             y = y, yend = yend),
+               color = "#f2f2f2",
+               lineend = "round", 
+               linejoin = "mitre",
+               size = 2) +
+  # Overlapping sector polygon
+  geom_segment(data = combined_data,
+               mapping = aes(x = x, xend = xend, 
+                   y = y, yend = yend, color = sector),
+               size = 2,
+               lineend = "round", 
+               linejoin = "mitre") +
+  # Inner Polygon Label
+  geom_text(data = combined_data,
+            aes(x = 0, y = 1,
+                label = year_month),
+            family = "Roboto Condensed") +
+  labs(caption = paste0("Source: {opendatatoronto} | ", 
+                        "Visualization by Ijeamaka Anyene - @ijeamaka_a")) +
+  scale_color_manual(
+    values = palette_values) +
+  scale_x_continuous(limits = c(-2, 2)) +
+  scale_y_continuous(limits = c(0, 3)) +
+  coord_fixed() +
+  facet_wrap(~year_month,
+             nrow = 6) +
+  theme(legend.position = "none",
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        plot.background = element_rect(fill = "#f9f9f9"),
+        panel.background = element_rect(fill = "#f9f9f9"),
+        panel.grid = element_blank(),
+        strip.text = element_blank(),
+        strip.background = element_blank()
+       )
+
+plot_body
+```
+
+```{r}
+patch = plot_legend / plot_body + plot_layout(heights = c(0.2, 1.2))
+patch
+```
+
+
+```{r}
+ggsave(filename = "2020-19_toronto_shelters.png", 
+       plot = patch, 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 8, height = 8)
+
+```
+
+
