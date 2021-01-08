@@ -97,14 +97,14 @@ ggplot(data = us_transit) +
   geom_text(data = year_label,
               aes(x = start_year, y = .9,
                 label = start_year,
-                color = line.x),
-            font = "Oswald",
+                color = line.x), 
+            family = "Open Sans",
             fontface = "bold") +
   geom_text(data = year_label,
               aes(x = end_year, y = .9,
                 label = end_year,
                 color = line.y),
-            font = "Oswald",
+            family = "Open Sans",
             fontface = "bold") +
   # start year
   geom_point(aes(x = start_year, y = 1),
@@ -126,7 +126,7 @@ ggplot(data = us_transit) +
   facet_wrap(~city, ncol = 1,
              strip.position = "top") +
   labs(y = NULL, x = NULL,
-       caption = paste0("Source: {opendatatoronto} | ", 
+       caption = paste0("Source: Transit Cost Project | ", 
                         "Icon: Smalllike @ Noun Project |\n",
                         "Viz: Ijeamaka Anyene - @ijeamaka_a"),
        title = "Transit Infrastructure Project: West Coast",
