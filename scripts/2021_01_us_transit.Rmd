@@ -1,0 +1,164 @@
+---
+title: "Transit Costs"
+author: "Ijeamaka Anyene"
+date: "1/4/2021"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggimage)
+library(magick)
+```
+
+```{r}
+extrafont::loadfonts()
+```
+
+```{r}
+transit_cost = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-05/transit_cost.csv')
+```
+
+```{r}
+train = image_transparent(image_read(here::here("data",
+                                                "us_transit",
+                                                "noun_Train_1872184.png")), 'white')
+
+train = image_colorize(train, 100, "white")
+```
+
+```{r}
+image_write(train, "train_white.png", format = "png")
+```
+
+```{r}
+img = c(here::here("data", "us_transit", "noun_Train_1872184.png"))
+```
+
+```{r}
+us_transit = transit_cost %>%
+  filter(country %in% c("US"),
+         city %in% c("Los Angeles", "Seattle", 
+                     "San Francisco", "San Jose")) %>%
+  mutate(start_year = as.numeric(start_year),
+         end_year = as.numeric(end_year)) %>%
+  select(line, city, start_year, end_year) %>%
+  mutate(city = stringr::str_to_upper(city),
+         image = c(img, img, NA, NA, NA, img, img))
+```
+
+source of image: Train by Smalllike from the Noun Project
+```{r}
+year_label = us_transit %>%
+  group_by(city) %>%
+  summarise(start_year = min(start_year),
+         end_year = max(end_year)) %>%
+  left_join(., select(us_transit, city, line, start_year),
+            by = c("city" = "city",
+                   "start_year" = "start_year")) %>%
+  left_join(., select(us_transit, city, line, end_year),
+            by = c("city" = "city",
+                   "end_year" = "end_year"))
+```
+
+```{r}
+color_palette = c("Purple Phase 3" = "#2d4059", 
+                  "Purple Phase 2" = "#008891", 
+                  "Purple Phase 1" = "#184d47",
+                  "Regional Connector" = "#939b62",
+                  "U-Link" = "#ea5455", 
+                  "Central Subway" = "#f07b3f",
+                  "BART" = "#ffd460")
+```
+
+```{r}
+ggplot(data = us_transit) +
+  # background line
+  geom_segment(aes(x = 2009, xend = 2030,
+                   y = 1, yend = 1),
+               lineend = "round",
+               color = "#454545",
+               size = 3) +
+  # actual line
+  geom_segment(aes(x = start_year, xend = end_year,
+                   y = 1, yend = 1,
+                   color = line),
+               lineend = "round",
+               size = 3) +
+  # Train icon
+  geom_image(aes(x = end_year - 2,
+                 y = 1.14, 
+                 image = image),
+             by = "width", 
+             asp = 2.5,
+             size = .3) +
+  # year labels
+  geom_text(data = year_label,
+              aes(x = start_year, y = .9,
+                label = start_year,
+                color = line.x),
+            font = "Oswald",
+            fontface = "bold") +
+  geom_text(data = year_label,
+              aes(x = end_year, y = .9,
+                label = end_year,
+                color = line.y),
+            font = "Oswald",
+            fontface = "bold") +
+  # start year
+  geom_point(aes(x = start_year, y = 1),
+             color = "white",
+             size = 3) +
+  geom_point(aes(x = start_year, y = 1, 
+                 color = line)) +
+  # end year
+  geom_point(aes(x = end_year, y = 1),
+             color = "white",
+             size = 3) +
+  geom_point(aes(x = end_year, y = 1, 
+                 color = line)) +
+  # scales
+  scale_x_continuous(limits = c(2009, 2030),
+                     breaks = seq(2009, 2030, by = 3)) +
+  scale_y_continuous(limits = c(.75, 1.25)) +
+  scale_color_manual(values = color_palette) +
+  facet_wrap(~city, ncol = 1,
+             strip.position = "top") +
+  labs(y = NULL, x = NULL,
+       caption = paste0("Source: {opendatatoronto} | ", 
+                        "Icon: Smalllike @ Noun Project |\n",
+                        "Viz: Ijeamaka Anyene - @ijeamaka_a"),
+       title = "Transit Infrastructure Project: West Coast",
+       subtitle = "The year started and actual/predicted end of city transit projects\n") +
+  theme(legend.position = "none",
+        plot.background = element_rect(fill = "#b0c5d0"),
+        plot.title = element_text(color = "black",
+                                  face = "bold",
+                                    family = "Open Sans"),
+        plot.caption = element_text(color = "black",
+                                    family = "Open Sans"),
+        panel.background = element_rect(fill = "#b0c5d0"),
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        strip.text = element_text(hjust = 0, 
+                                  family = "Oswald",
+                                  face = "bold",
+                                  color = "white",
+                                  size = 18),
+        strip.background = element_rect(fill = "#b0c5d0"))
+  
+```
+
+```{r}
+ggsave(filename = "2021_01_ustransit.png", 
+       plot = last_plot(), 
+       device = "png",
+       type = "cairo",
+       path = here::here("outputs"), 
+       width = 5, height = 7)
+```
+
+
