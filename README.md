@@ -2,6 +2,16 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 01/05/2021 - 01/09/2021 </b><br>
+<i> Output: 2021-01</i><br>
+West Coast Transit Infrastructure Projects<br><br>
+![Toronto-shelter](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_01_ustransit.png)
+
+<b> Dates: 12/01/2020 - 12/05/2020 </b><br>
+<i> Output: 2020-19</i><br>
+Toronto shelters at <95% capacity<br><br>
+![Toronto-shelter](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2020-19_toronto_shelters.png)
+
 <b> Dates: 11/22/2020 - 11/28/2020 </b><br>
 <i> Output: 2020-18</i><br>
 Top features of top washington trails<br><br>
