@@ -2,6 +2,11 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 01/10/2021 - 01/16/2021 </b><br>
+<i> Output: 2021-02</i><br>
+Tate Art Musuem<br><br>
+![Tate](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_02_tate.png)
+
 <b> Dates: 01/05/2021 - 01/09/2021 </b><br>
 <i> Output: 2021-01</i><br>
 West Coast Transit Infrastructure Projects<br><br>
