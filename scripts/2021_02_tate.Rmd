@@ -80,20 +80,21 @@ artwork_year_grid %>%
   scale_color_manual(values = c("#3f3e4b", "#52635d", "#817141", "#fdb66e",
                                 "#a68974", "#8c4c46", "#caccc2")) +
   ylim(-3, 5) +
-  xlim(0, 51.5) +
+  xlim(-0.1, 51.5) +
   coord_polar() +
   labs(title = "TATE ACQUISITIONS OF ART, 1800 - 2000",
        subtitle = "Each ring represents a half-century beginning with the inner ring at 1800.\n", 
-       color = "Number of Acquisitions"
-       ) +
+       caption = "Source: Tate Art Museum | Viz: Ijeamaka Anyene - @ijeamaka_a",
+       color = "Number of Acquisitions") +
   guides(colour = guide_legend(nrow = 1, title.position = "top", label.position = "bottom")) +
   theme(legend.position = "bottom",
         plot.title = element_text(hjust = 0.5, family = "Lora", face = "bold",
                                   size = 25),
         plot.subtitle = element_text(hjust = 0.5, family = "Roboto Condensed",
                                      size = 15),
+        plot.caption = element_text(family = "Roboto Condensed"),
         plot.background = element_rect(fill = "#fdfcf3", colour = "black", size = 3),
-        plot.margin = unit(c(7, 10, 7, 10), units = "mm"),
+        plot.margin = unit(c(7, 10, 3, 10), units = "mm"),
         panel.background = element_rect(fill = "black", colour = "black"),
         legend.title = element_text(family = "Lora", size = 15, 
                                     hjust = 0.5, face = "bold"),
@@ -116,7 +117,7 @@ ggsave("2021_02_tate.png",
        device = "png",
        here::here("outputs"),
        width = 8,
-       height = 11
+       height = 10
        )
 
 ```
