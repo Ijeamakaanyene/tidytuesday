@@ -1,0 +1,124 @@
+---
+title: "2021_02_tate"
+author: "Ijeamaka Anyene"
+date: "1/12/2021"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+extrafont::loadfonts()
+
+```
+
+```{r}
+artwork = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-12/artwork.csv') %>%
+  janitor::clean_names()
+
+artists = readr::read_csv("https://github.com/tategallery/collection/raw/master/artist_data.csv") %>%
+  janitor::clean_names()
+```
+
+```{r}
+artwork_year = artwork %>% 
+  filter(is.na(acquisition_year) == FALSE) %>%
+  mutate(century_group = if_else(
+    as.numeric(stringr::str_sub(acquisition_year, 3, 4)) < 50,
+    as.numeric(paste0(stringr::str_sub(acquisition_year, 1, 2), "00")),
+    as.numeric(paste0(stringr::str_sub(acquisition_year, 1, 2), "50")))) %>%
+  group_by(century_group, acquisition_year) %>%
+  count() %>%
+  mutate(year_seq = acquisition_year - century_group,
+         n_group = case_when(
+           n == 1 ~ 1,
+           n < 100 ~ 100,
+           n >= 100 & n < 500 ~ 500,
+           n >= 500 & n < 1000 ~ 1000,
+           n >= 1000 & n < 4000 ~ 4000,
+           n == 37893 ~ 37893))
+```
+
+
+```{r}
+grids = tibble(
+  year = seq(1800, 2000, by = 50),
+  y = seq(1, length(year))
+)
+```
+
+```{r}
+artwork_year_grid = left_join(artwork_year, grids,
+                              by = c("century_group" = "year"))
+
+```
+
+```{r}
+year_labels = tibble(
+    y = seq(1, 5),
+    x = rep(0, 5), 
+    text = c("1800", "1850", "1900", "1950", "2000")
+)
+
+```
+
+```{r}
+artwork_year_grid %>%
+  ggplot(.) +
+  geom_segment(aes(x = year_seq + .75, xend = year_seq + (.75+.9),
+                   y = y, yend = y, color = as.factor(n_group)),
+               size = 3) +
+  geom_text(data = year_labels,
+            aes(x = x, y = y, label = text),
+            family = "Lora",
+            fontface = "bold",
+            color = "#fce9db") +
+  scale_color_manual(values = c("#3f3e4b", "#52635d", "#817141", "#fdb66e",
+                                "#a68974", "#8c4c46", "#caccc2")) +
+  ylim(-3, 5) +
+  xlim(0, 51.5) +
+  coord_polar() +
+  labs(title = "TATE ACQUISITIONS OF ART, 1800 - 2000",
+       subtitle = "Each ring represents a half-century beginning with the inner ring at 1800.\n", 
+       color = "Number of Acquisitions"
+       ) +
+  guides(colour = guide_legend(nrow = 1, title.position = "top", label.position = "bottom")) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, family = "Lora", face = "bold",
+                                  size = 25),
+        plot.subtitle = element_text(hjust = 0.5, family = "Roboto Condensed",
+                                     size = 15),
+        plot.background = element_rect(fill = "#fdfcf3", colour = "black", size = 3),
+        plot.margin = unit(c(7, 10, 7, 10), units = "mm"),
+        panel.background = element_rect(fill = "black", colour = "black"),
+        legend.title = element_text(family = "Lora", size = 15, 
+                                    hjust = 0.5, face = "bold"),
+        legend.background = element_rect(fill = "#fdfcf3"),
+        legend.key = element_blank(),
+        legend.key.width = unit(20, "mm"),
+        legend.text = element_text(family = "Roboto Condensed", hjust = 0.5, size = 12),
+        legend.direction = "horizontal",
+        panel.grid = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+```
+
+
+```{r}
+ggsave("2021_02_tate.png",
+       plot = last_plot(),
+       device = "png",
+       here::here("outputs"),
+       width = 8,
+       height = 11
+       )
+
+```
+
+
