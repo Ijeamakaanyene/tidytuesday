@@ -36,11 +36,11 @@ artwork_year = artwork %>%
   mutate(year_seq = acquisition_year - century_group,
          n_group = case_when(
            n == 1 ~ 1,
-           n < 100 ~ 100,
-           n >= 100 & n < 500 ~ 500,
-           n >= 500 & n < 1000 ~ 1000,
-           n >= 1000 & n < 4000 ~ 4000,
-           n == 37893 ~ 37893))
+           n <= 100 ~ 100,
+           n > 100 & n <= 500 ~ 500,
+           n > 500 & n <= 1000 ~ 1000,
+           n > 1000 & n <= 4000 ~ 4000,
+           n  > 4000 ~ 37000))
 ```
 
 
