@@ -65,7 +65,7 @@ plastic_type = plastic_type %>%
 
 ```{r}
 # Creating appropriate number of image repeats
-# also sorting randomly so it looks more interesting
+# also maybe sorting randomly so it looks more interesting
 image_list = list()
 
 for(i in 1:nrow(plastic_type)){
@@ -80,30 +80,43 @@ image_vector_random = image_vector[sample(1:341, 341, replace = FALSE)]
 ```
 
 ```{r}
-# Creating grid so imaged are slightly staggered
 grids = tibble(
-  y = rep(c(seq(1,11, by = 2),
-        seq(2,11, by = 2)), length.out = 341)
+  len = seq(0, 2*pi, length.out = 36),
+  x = round(sin(len) * 25, 1),
+  y = round(cos(len) * 25, 1)
 )
 ```
 
 ```{r}
-x_list = list()
-for(i in 1:62){
-  if(i %% 2 == 0){
-    x_list[[i]] = rep(i, 6)
-  } else {
-    x_list[[i]] = rep(i, 5)
-  }
+grids_left = grids %>%
+  filter(x < 0) 
+
+grids_list_left = list()
+
+for(i in 1:nrow(grids_left)){
+  grids_list_left[[i]] = tibble(
+    x = seq(grids_left$x[i], -grids_left$x[i], by = 1.675),
+    y = grids_left$y[i]
+  )
 }
 
-grids$x = unlist(x_list)
+grids_flat = bind_rows(grids_list_left) %>%
+  arrange(y, x)
 ```
 
 ```{r}
-# Adding images to grid
-grids$images = image_vector
+grids_flat$images = image_vector
 ```
+
+```{r}
+# The spacing is weird, manual tinkering for aesthetics
+grids_flat = grids_flat %>%
+  mutate(y = if_else(y == 24.6, 26,
+                     if_else(y == 23.4, 24, 
+                             if_else(y == -24.9, -26,
+                                     if_else(y == -24.1, -25, y)))))
+```
+
 
 ```{r}
 # creating legend
@@ -116,38 +129,37 @@ legend = plastic_type %>%
     name == "ps" ~ "Polystyrene",
     name == "pvc" ~ "PVC"),
     full_name = stringr::str_wrap(full_name, 20),
-    x = seq(5, 60, length.out = 6),
-    y = -6)
+    x = seq(-20, 20, length.out = 6),
+    y = -47)
 
 ```
 
-
 ```{r}
-ggplot() +
-  geom_image(data = grids,
-             aes(x = x, y = y, image = images),
-             size = 0.04) +
-  annotate("text", x = 32, y = -1,
-           size = 25,
+ggplot(data = grids_flat) +
+  #geom_point(aes(x = x, y = y)) +
+  geom_image(aes(x = x, y = y, image = images),
+             size = 0.028, asp = 1.6) +
+   annotate("text", x = 0, y = -33,
+           size = 26,
            label = "GLOBAL PLASTIC POLLUTION",
            color = "#d5d8c2",
            family = "Oswald") +
-  annotate("text", x = 30, y = -3.5,
-           size = 10,
+  annotate("text", x = 0, y = -39.5,
+           size = 8,
            color = "white",
-           label = "Each item represents 500 pieces of a plastic type\n collected during Break Fee from Plastic's \n2019 brand audit.",
+           label = "Each item represents 500 pieces of a plastic type\n collected during Break Free From Plastic's \n2019 brand audit.",
            family = "Open Sans") +
   geom_text(data = legend,
-            aes(x = x, y = y - 1.5,
+            aes(x = x, y = y - 3.75,
                 label = full_name), 
-            fontface = "bold",
+            #fontface = "bold",
             size = 5,
             color = "white", 
             family = "Open Sans SemiBold") +
   geom_image(data = legend,
              aes(x = x, y = y, image = images),
-             size = 0.06) +
-  scale_y_continuous(limits = c(-9, NA)) +
+             size = 0.05) +
+  scale_y_continuous(limits = c(-52, NA)) +
   labs(caption = "Source: Break Free From Plastic | Icons: Noun Project | Viz: Ijeamaka Anyene - @ijeamaka_a") +
   theme_void() +
   theme(
@@ -157,18 +169,18 @@ ggplot() +
                                    color = NA),
     plot.margin = margin(0, 0, 5, 0, unit = "pt"),
     plot.caption = element_text(color = "white",
-                                size = 12)
-  )
+                                size = 12))
+
 ```
 
 
 ```{r}
 ggsave(
-  "2021_03_plastic_pollution.png", device = "png", plot = last_plot(), path = here::here("outputs"), width = 12, height = 15
+  "2021_03_plastic_pollution.png", device = "png", plot = last_plot(), path = here::here("outputs"), width = 12, 
+  height = 17, dpi = 300
 )
 
 ```
-
 
 Milk by TRAVIS BIRD from the Noun Project
 plastic bag by Alice Noir from the Noun Project
@@ -176,5 +188,3 @@ Food Container by Stefan Kovac from the Noun Project
 Coffee by Vectplus from the Noun Project
 pipe by Icon Lauk from the Noun Project
 Plastic by Sarote Impheng from the Noun Project
-
-
