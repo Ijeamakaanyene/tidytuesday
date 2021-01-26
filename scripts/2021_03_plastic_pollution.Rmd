@@ -1,0 +1,180 @@
+---
+title: "plastic pollution"
+author: "Ijeamaka Anyene"
+date: "1/25/2021"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggimage)
+library(magick)
+```
+
+```{r}
+extrafont::loadfonts()
+```
+
+```{r}
+plastics = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-26/plastics.csv')
+```
+
+```{r}
+# Changing color to white
+files = list.files(here::here("data", "plastics"))
+files = files[2:7]
+images = image_read(paste0(here::here("data", "plastics"), "/", 
+                files))
+```
+
+```{r}
+for(i in 1:length(images)){
+  images_white = image_colorize(images[i], 100, "white")
+  image_write(images_white, 
+             path = paste0("white_", files[i]),
+             format = "png")
+  
+}
+```
+
+```{r}
+files = list.files(here::here("data", "plastics"))
+files = files[8:13]
+images = paste0(here::here("data", "plastics"), "/", files)
+```
+
+```{r}
+# determining number of plastic collected by type
+plastic_type = plastics %>%
+  filter(parent_company == "Grand Total") %>%
+  select(-c(grand_total, num_events, volunteers, empty, o)) %>%
+  pivot_longer(-c(country, year, parent_company)) %>%
+  filter(is.na(value) == FALSE) %>%
+  group_by(name) %>%
+  summarise(total_val = round(sum(value) / 500, 0)) %>%
+  ungroup()
+```
+
+```{r}
+# pulling in plastic images
+plastic_type = plastic_type %>%
+  mutate(images = images)
+```
+
+```{r}
+# Creating appropriate number of image repeats
+# also sorting randomly so it looks more interesting
+image_list = list()
+
+for(i in 1:nrow(plastic_type)){
+  
+  image_list[[i]] = rep(plastic_type$images[i], 
+                        plastic_type$total_val[i])
+  
+}
+
+image_vector = unlist(image_list)
+image_vector_random = image_vector[sample(1:341, 341, replace = FALSE)]
+```
+
+```{r}
+# Creating grid so imaged are slightly staggered
+grids = tibble(
+  y = rep(c(seq(1,11, by = 2),
+        seq(2,11, by = 2)), length.out = 341)
+)
+```
+
+```{r}
+x_list = list()
+for(i in 1:62){
+  if(i %% 2 == 0){
+    x_list[[i]] = rep(i, 6)
+  } else {
+    x_list[[i]] = rep(i, 5)
+  }
+}
+
+grids$x = unlist(x_list)
+```
+
+```{r}
+# Adding images to grid
+grids$images = image_vector
+```
+
+```{r}
+# creating legend
+legend = plastic_type %>%
+  mutate(full_name = case_when(
+    name == "hdpe" ~ "High density polyethylene",
+    name == "ldpe" ~ "Low density polyethylene",
+    name == "pet" ~ "Polyester plastic",
+    name == "pp" ~ "Polypropylene",
+    name == "ps" ~ "Polystyrene",
+    name == "pvc" ~ "PVC"),
+    full_name = stringr::str_wrap(full_name, 20),
+    x = seq(5, 60, length.out = 6),
+    y = -6)
+
+```
+
+
+```{r}
+ggplot() +
+  geom_image(data = grids,
+             aes(x = x, y = y, image = images),
+             size = 0.04) +
+  annotate("text", x = 32, y = -1,
+           size = 25,
+           label = "GLOBAL PLASTIC POLLUTION",
+           color = "#d5d8c2",
+           family = "Oswald") +
+  annotate("text", x = 30, y = -3.5,
+           size = 10,
+           color = "white",
+           label = "Each item represents 500 pieces of a plastic type\n collected during Break Fee from Plastic's \n2019 brand audit.",
+           family = "Open Sans") +
+  geom_text(data = legend,
+            aes(x = x, y = y - 1.5,
+                label = full_name), 
+            fontface = "bold",
+            size = 5,
+            color = "white", 
+            family = "Open Sans SemiBold") +
+  geom_image(data = legend,
+             aes(x = x, y = y, image = images),
+             size = 0.06) +
+  scale_y_continuous(limits = c(-9, NA)) +
+  labs(caption = "Source: Break Free From Plastic | Icons: Noun Project | Viz: Ijeamaka Anyene - @ijeamaka_a") +
+  theme_void() +
+  theme(
+    panel.background = element_rect(fill = "#173045",
+                                    color = NA),
+    plot.background = element_rect(fill = "#173045",
+                                   color = NA),
+    plot.margin = margin(0, 0, 5, 0, unit = "pt"),
+    plot.caption = element_text(color = "white",
+                                size = 12)
+  )
+```
+
+
+```{r}
+ggsave(
+  "2021_03_plastic_pollution.png", device = "png", plot = last_plot(), path = here::here("outputs"), width = 12, height = 15
+)
+
+```
+
+
+Milk by TRAVIS BIRD from the Noun Project
+plastic bag by Alice Noir from the Noun Project
+Food Container by Stefan Kovac from the Noun Project
+Coffee by Vectplus from the Noun Project
+pipe by Icon Lauk from the Noun Project
+Plastic by Sarote Impheng from the Noun Project
+
+
