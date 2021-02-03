@@ -1,0 +1,132 @@
+---
+title: "hbcus"
+author: "Ijeamaka Anyene"
+date: "2/1/2021"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(ggtext)
+```
+
+```{r}
+extrafont::loadfonts()
+
+```
+
+```{r}
+hbcu_all = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-02/hbcu_all.csv') %>%
+  janitor::clean_names()
+```
+
+```{r}
+hbcu_enrollment = 
+  hbcu_all %>%
+  transmute(year = year,
+            perc_male = males / total_enrollment * 10, 
+            perc_female = females /total_enrollment * 10)
+```
+
+```{r}
+hbcu_enrollment = hbcu_enrollment %>%
+  mutate(len = seq(0, pi, length.out = 32),
+         x = sin(len),
+         y = cos(len),
+         xend = sin(len) * 10,
+         yend = cos(len) * 10,
+         y_range = yend - y,
+         x_range = xend - x) 
+```
+
+```{r}
+final_hbcu = 
+  hbcu_enrollment %>%
+  transmute(year = year,
+         x_male = x,
+         x_male_end = (perc_male * x_range) / 10,
+         y_male = y,
+         y_male_end = (perc_male * y_range) / 10,
+         male_label = perc_male * 10,
+         x_female = x_male_end,
+         x_female_end = xend,
+         y_female = y_male_end,
+         y_female_end = yend)
+```
+
+```{r}
+year_labels = hbcu_enrollment %>%
+  mutate(x = sin(len) * 11,
+         y = cos(len) * 11,
+         angle = c(seq(90, 0, length.out = 16),
+                   seq(360, 270, length.out = 16))) %>%
+  select(year, x, y, angle)
+
+```
+
+```{r}
+titles = tibble(
+  x = -1,
+  y = 0, 
+  label = "<span style='color:white;font-size:30pt'>**Historically Black<br>
+  Colleges and<br>
+  Universities**</span><br>
+<span style='color:white;font-size:18pt'>*1976 - 2015 Enrollment*</span><br><br>
+  <span style='color:white;font-size:12pt'>The proportion of enrolled students that are</span><span style='color:#007a4d;font-size:12pt'> women</span><br> 
+  <span style='color:white;font-size:12pt'>has consistently been larger than the proportion<br>
+  that are</span><span style='color:#f2a70c;font-size:12pt'> men</span><span style='color:white;font-size:12pt'> throughout the history of HBCUs.</span>"
+)
+
+```
+
+```{r}
+ggplot(data = final_hbcu) + 
+  # male lines 
+  geom_segment(aes(x = x_male, y = y_male,
+                 xend = x_male_end, yend = y_male_end),
+               size = 2,
+               color = "#f2a70c") + 
+  # female lines
+  geom_segment(aes(x = x_female, y = y_female,
+                 xend = x_female_end, yend = y_female_end),
+               size = 2,
+               color = "#007a4d") + 
+  # Title
+  geom_richtext(data = titles,
+                aes(x = x, y = y, label = label),
+                family = "Literata",
+                hjust = 1,
+                fill = NA,
+                color = NA) +
+  # Year Label
+  geom_text(data = year_labels,
+            aes(x = x, y = y, label = year,
+                angle = angle),
+            family = "Literata",
+            color = "white") +
+  xlim(-15, 11) +
+  labs(caption = "Source: National Center for Education Statistics | Viz: Ijeamaka Anyene - @ijeamaka_a") +
+  coord_fixed() +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black"),
+        plot.margin = margin(4, 4, 4, 4, unit = "pt"),
+        panel.background = element_rect(fill = "black"),
+        plot.caption = element_text(color = "white",
+                                    family = "Literata",
+                                    size = 7)
+        )
+
+```
+
+
+```{r}
+ggsave("2021_04_hbcus.png", 
+       plot = last_plot(), 
+       device = "png", 
+       path = here::here("Outputs"),
+       width = 10, 
+       height = 8)
+
+```
