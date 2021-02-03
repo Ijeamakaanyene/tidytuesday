@@ -2,6 +2,12 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 01/24/2021 - 01/30/2021 </b><br>
+<i> Output: 2021-03</i><br>
+Break Free From Plastic<br><br>
+![Plastic](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_03_plastic_pollution.png)
+
+
 <b> Dates: 01/10/2021 - 01/16/2021 </b><br>
 <i> Output: 2021-02</i><br>
 Tate Art Musuem<br><br>
