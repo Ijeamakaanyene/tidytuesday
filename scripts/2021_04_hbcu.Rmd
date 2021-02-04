@@ -46,9 +46,9 @@ final_hbcu =
   hbcu_enrollment %>%
   transmute(year = year,
          x_male = x,
-         x_male_end = (perc_male * x_range) / 10,
+         x_male_end = x + ((perc_male * x_range) / 10),
          y_male = y,
-         y_male_end = (perc_male * y_range) / 10,
+         y_male_end = y + ((perc_male * y_range) / 10),
          male_label = perc_male * 10,
          x_female = x_male_end,
          x_female_end = xend,
