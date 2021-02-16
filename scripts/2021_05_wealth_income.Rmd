@@ -1,0 +1,214 @@
+---
+title: "wealth_and_income"
+author: "Ijeamaka Anyene"
+date: "2/11/2021"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+```
+
+```{r, message = FALSE}
+extrafont::loadfonts()
+```
+
+```{r}
+lifetime_earn <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/lifetime_earn.csv')
+
+student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
+
+```
+Coding Started: 4:37 PM
+Ideating Started: 4:48 PM
+Coding Started: 4:51 PM
+Codong Stopped: 5:01 PM
+
+*SWITCHED IDEAS*
+Re-Ideating Started: 5:07 PM
+Ideating Stopped: 5:14 PM
+Figuring out how to map data to idea: 5:14 PM
+Figured it out by 5:20 PM
+Coding Started: 5:21 PM
+Figuring Out Legend Started: 5:27 PM
+Paused Figuring Out Legend to walk Waffles: 5:37 PM
+Back! Lets think colors lol: 5:55 PM
+Paused: 6:03
+Back to Colors: 6:09
+Back to Legend/Patchwork Shenanigans: 6:11
+Paused for Dinner: 6:33
+Back to Patchwork fiddling: 7:08
+Finished lol: 8:30
+Fiddled around with it for 15 more minutes
+
+```{r}
+student_debt_black = filter(student_debt, race == "Black") %>%
+  arrange(year) %>%
+  mutate(pct_scaled = 10 - (loan_debt_pct*10),
+         loan_debt_pct_100 = paste0(round(loan_debt_pct*100, 1), "%"))
+```
+
+```{r}
+student_debt_list = list()
+
+for(i in 1:nrow(student_debt_black)){
+  student_debt_list[[i]] = tibble(
+    year = student_debt_black$year[i],
+    x = c(0, 10, 10, 0),
+    y = c(10, 10, rep(student_debt_black$pct_scaled[i], 2)),
+    pct_label = student_debt_black$loan_debt_pct_100[i]
+  )
+}
+```
+
+```{r}
+main_plot = 
+  ggplot(data = bind_rows(student_debt_list)) +
+  geom_segment(aes(x = 0, xend = 10,
+                   y = 10, yend = 10),
+               size = 2,
+               color = "#cdcdc0") +
+  geom_polygon(aes(x = x, 
+                   y = y,
+                   group = year),
+               fill = "#0c1931") +
+  geom_text(aes(x = 5, y = 0, label = year),
+            size = 6,
+            family = "Oswald",
+            fontface = "bold",
+            color = "#626d71") +
+  geom_text(aes(x = 5, y = 3, label = pct_label),
+            size = 3,
+            family = "Open Sans",
+            fontface = "bold",
+            color = "black") +
+  facet_wrap(~year, nrow = 2) +
+  coord_polar() +
+  ylim(0, 10) +
+  labs(title =  "Black Student Loan Debt Crisis") +
+  theme_void() +
+  theme(
+    strip.background = element_blank(),
+    strip.text = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold", 
+                              size = 30, color = "black", family = "Oswald"),
+    panel.background = element_rect(fill = "#f4f2f2",
+                                    color = NA),
+    plot.background = element_rect(fill = "#f4f2f2",
+                                   color = NA),
+    plot.margin = margin(5, 0, 0, 0)
+  ) +
+  NULL
+
+main_plot
+```
+
+```{r}
+# 10, 25, 50, 75
+legend_data = tibble(
+  type = c(10, 25, 50, 75),
+  type_scales = c(1, 2.5, 5, 7.5),
+  label = paste0(type, "%"),
+  y = 10 - type_scales
+)
+
+
+legend_list = list()
+
+
+for(i in 1:nrow(legend_data)){
+  legend_list[[i]] = tibble(
+    label = legend_data$label[i],
+    type = legend_data$type[i],
+    x = c(0, 10, 10, 0),
+    y = c(10, 10, rep(legend_data$y[i], 2))
+  )
+}
+```
+
+```{r}
+legend_plot = 
+  ggplot(data = bind_rows(legend_list)) +
+  geom_segment(aes(x = 0, xend = 10,
+                   y = 10, yend = 10),
+               size = 2,
+               color = "#cdcdc0") +
+  geom_polygon(aes(x = x, 
+                   y = y,
+                   group = type),
+               fill = "#0c1931") +
+  facet_wrap(~label, nrow = 1) +
+  coord_polar() +
+  ylim(0, 10) +
+  theme_void() +
+  theme(strip.text = element_text(face = "bold", color = "#0c1931",
+                                  family = "Open Sans"),
+        panel.background = element_rect(fill = "#f4f2f2",
+                                    color = NA),
+        plot.background = element_rect(fill = "#f4f2f2",
+                                   color = NA),
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 30))
+
+legend_plot
+```
+
+
+```{r}
+title_plot = 
+  ggplot() +
+  geom_text(aes(x  = 0, y = 2, label = "Percentage of Total Debt Held"),
+            family = "Oswald",
+            fontface = "bold",
+            hjust = 0,
+            size = 3) +
+  geom_text(aes(x = 0, y = 1, label = "The thickness of the inner perimeter of each circle\n represents of the percentage of the total student loan debt\n held by Black families."),
+           family = "Open Sans",
+           hjust = 0,
+           size = 2) +
+  ylim(0, 5) +
+  scale_x_continuous(limits = c(0, 3), expand = c(0, 0)) +
+  labs(caption = "Data by Urban Institue | Viz by @ijeamaka_a") +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "#f4f2f2",
+                                    color = NA),
+        plot.background = element_rect(fill = "#f4f2f2",
+                                   color = NA),
+        plot.margin = margin(0, 0, 0, 0),
+        plot.caption = element_text(size = 6, family = "Open Sans"))
+
+title_plot
+```
+
+The thickness of the inner perimeter of each circle represents of the total \nstudent loan debt, what percentage is held by Black families.
+
+
+Top - Bottom: 1 - 20
+Left - Right: 1 - 15
+```{r}
+layout = c(
+  area(t = 1, l = 1, b = 18, r = 15),
+  area(t = 19, l = 1, b = 20, r = 5),
+  area(t = 16, l = 6, b = 20, r = 15)
+)
+
+```
+
+
+
+```{r}
+main_plot + legend_plot + title_plot + 
+  plot_layout(design = layout) 
+
+```
+
+
+```{r}
+ggsave("2021_05_wealth_income.pdf", plot = last_plot(), 
+       device = cairo_pdf, path = here::here("outputs"),
+       width = 9, height = 6) 
+
+
+```
+
