@@ -2,6 +2,18 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 02/15/2021 - 02/19/2021 </b><br>
+<i> Output: 2021-06</i><br>
+W.E.B. Du Bois Recreations<br><br>
+![Furniture](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_06_webdubois.png)
+
+
+<b> Dates: 02/08/2021 - 02/12/2021 </b><br>
+<i> Output: 2021-05</i><br>
+Black Student Loan Debt<br><br>
+![Student Loan](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_05_wealth_income.png)
+
+
 <b> Dates:  02/01/2021 - 02/05/2021 </b><br>
 <i> Output: 2021-04</i><br>
 HBCU Enrollment<br><br>
