@@ -1,0 +1,120 @@
+---
+title: "DuBois Data"
+author: "Ijeamaka Anyene"
+date: "2/15/2021"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(glue)
+```
+
+```{r}
+extrafont::loadfonts()
+```
+
+```{r}
+furniture = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-16/furniture.csv') %>%
+  janitor::clean_names()
+```
+
+```{r}
+# Color palette pulled from original image
+bcgrnd = "#e4d2c1"
+yr_1875 = "#eaafa6"
+yr_1880 = "#9da0b0"
+yr_1885 = "#c4a58f"
+yr_1890 = "#ecb025"
+yr_1895 = "#d8c7b3"
+yr_1899 = "#dc354a"
+```
+
+```{r}
+dubois_palette = c(`1875` = yr_1875,
+                   `1880` = yr_1880,
+                   `1885` = yr_1885,
+                   `1890` = yr_1890,
+                   `1895` = yr_1895,
+                   `1899` = yr_1899)
+```
+
+```{r}
+max_x = max(furniture$houshold_value_dollars) / 2
+# Slope calculated using year 1885
+slope = (7 - -1) / (0 - 717487.5)
+```
+
+```{r}
+furniture_spiral = furniture %>%
+  mutate(year = as.factor(year),
+         y = seq(10, by = -1.5, length.out = 6),
+         x = 0) %>%
+  rowwise() %>%
+  mutate(xend = min(houshold_value_dollars, max_x),
+         yend = slope*xend + y) %>%
+  mutate(y_2 = yend,
+         x_2 = 0,
+         xend_2 = if_else(houshold_value_dollars < max_x,
+                          NA_real_, houshold_value_dollars - max_x),
+         yend_2 = slope*xend_2 + y_2)
+```
+
+```{r}
+furniture_label = furniture_spiral %>%
+  select(year, houshold_value_dollars, y, x) %>%
+  mutate(dollars = scales::dollar(houshold_value_dollars, prefix = "$"),
+         label = if_else(year %in% c("1880", "1885"),
+                         glue("{year} -----  {dollars}"),
+                         if_else(year == "1875",
+                                 glue("{year} -----    {dollars}"),
+                                 glue("{year} --- {dollars}"))))
+
+```
+
+```{r}
+ggplot(data = furniture_spiral) +
+  # first part of spiral
+  geom_segment(aes(x = x, xend = xend,
+                   y = y, yend = yend,
+                   color = year), 
+               size = 3) +
+  # second part of spiral
+  geom_segment(aes(x = x_2, xend = xend_2,
+                   y = y_2, yend = yend_2,
+                   color = year),
+               size = 3) +
+  geom_text(data = furniture_label,
+            aes(x = x, y = y,
+                label = label),
+            family = "Roboto Condensed",
+            size = 2.5,
+            hjust = 1) +
+  labs(title = "ASSESSED VALUE OF HOUSEHOLD\n AND KITCHEN FURNITURE\n OWNED BY GEORGIA NEGROES.",
+       caption = "Source: W.E.B Du Bois's Data Portraits Prepared for #DuBoisChallenge | Viz by Ijeamaka Anyene") +
+  scale_color_manual(values = dubois_palette) +
+  coord_polar(clip = "off") +
+  ylim(-25, 15) +
+  xlim(0, 717487.5) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = bcgrnd,
+                                       color = NA),
+        plot.margin = margin(t = 20, r = 5, b = 5, l = 5),
+        panel.background = element_rect(fill = bcgrnd,
+                                        color = NA),
+        plot.title = element_text(hjust = 0.5, family = "Cutive",
+                                  face = "bold", size = 15),
+        plot.caption = element_text(size = 4, family = "Open Sans"),
+        legend.position = "none") +
+  NULL 
+
+
+```
+
+```{r}
+ggsave("2021_06_webdubois.png", plot = last_plot(), 
+       device = "png", path = here::here("outputs"),
+       width = 6, height = 7)
+
+```
