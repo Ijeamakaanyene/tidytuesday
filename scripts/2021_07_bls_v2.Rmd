@@ -1,0 +1,105 @@
+---
+title: "2021_07_bls"
+author: "Ijeamaka Anyene"
+date: "2/22/2021"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggtext)
+```
+
+```{r}
+extrafont::loadfonts()
+```
+
+```{r}
+earn = readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-23/earn.csv')
+```
+
+```{r}
+black_earn = earn %>%
+  filter(race %in% c("Black or African American", "White")) %>%
+  filter(age %in% c("16 to 24 years", "25 to 54 years", "55 years and over"),
+         sex == "Women") %>%
+  group_by(sex, race, age, year) %>%
+  summarise(median_earn_scaled = median(median_weekly_earn) / 100) %>%
+  ungroup()
+```
+
+```{r}
+square_list = list()
+for(i in 1:nrow(black_earn)){
+  square_list[[i]] = tibble(
+    race = black_earn$race[i],
+    age = black_earn$age[i],
+    year = black_earn$year[i],
+    x = c(0, black_earn$median_earn_scaled[i], black_earn$median_earn_scaled[i], 0),
+    y = c(0, 0, black_earn$median_earn_scaled[i], black_earn$median_earn_scaled[i])
+  )
+}
+```
+
+```{r}
+square_gap = bind_rows(square_list) %>%
+  mutate(race_new = factor(race, levels = c("White", "Black or African American")))
+```
+
+```{r}
+square_gap %>%
+  ggplot() +
+  geom_polygon(aes(x = x, y = y, fill = race_new, color = race_new)) +
+  facet_wrap(~age + year, nrow = 3, dir = "h", strip.position = "bottom") +
+  scale_fill_manual(values = c("#d7d9e3", "#fefdfd")) +
+  scale_color_manual(values = c("#d7d9e3", "#fefdfd")) +
+  labs(title = "The Persistent Pay Disparity between Black and White Women",
+       subtitle = "The width of each square represents the median weekly earning in U.S. dollars for each race and age group. <br>The grey squares represents the earnings of white women, while the white squares represents the earnings of Black women.",
+       caption = "Data by U.S. Bureau of Labor Statistics | Viz by Ijeamaka Anyene") +
+  ylim(0, 9.7) +
+  xlim(0, 9.7) +
+  coord_equal() +
+  theme_void() +
+  theme(legend.position = "none",
+        strip.background = element_blank(),
+        strip.text = element_text(face = "bold", size = 6,
+                                  family = "Roboto Condensed"),
+        plot.title = element_markdown(hjust = 0.5,
+                                  margin = margin(t = 10, r = 0, b = 10, l = 0),
+                                  size = 21,
+                                  family = "Josefin Sans"),
+        
+        plot.subtitle = element_markdown(hjust = 0.5,
+                                  margin = margin(t = 0, r = 0, b = 10, l = 0),
+                                  size = 10,
+                                  family = "Roboto Condensed"),
+        plot.caption = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0),
+                                  size = 5,
+                                  family = "Roboto Condensed"),
+        plot.background = element_rect(fill = "#eaedee", color = NA),
+        plot.margin = margin(t = 0, r = 10, b = 0, l = 10),
+        panel.background = element_rect(fill = "#54739a", color = "black", size = 2),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank())
+
+
+```
+
+```{r}
+ggsave("2021_07_bls.png", 
+       plot = last_plot(), 
+       device = "png", 
+       path = here::here("outputs"),
+       width = 9, height = 5) 
+
+# Thankaya to Jake Kaupp for this code!
+magick::image_read(here::here("outputs", "2021_07_bls.png")) %>% 
+  magick::image_trim() %>% 
+  magick::image_write(here::here("outputs", "2021_07_bls.png"))
+
+```
+
+
+

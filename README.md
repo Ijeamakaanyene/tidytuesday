@@ -2,6 +2,11 @@
 Tracking my #TidyTuesday submissions. Here is to getting better at `ggplot`!
 For more information about TidyTuesday, check out the rfordatascience tidytuesday repo.
 
+<b> Dates: 02/22/2021 - 02/26/2021 </b><br>
+<i> Output: 2021-07</i><br>
+BLS: Earnings and Employment<br><br>
+![BLS](https://raw.githubusercontent.com/Ijeamakaanyene/tidytuesday/master/outputs/2021_07_bls.png)
+
 <b> Dates: 02/15/2021 - 02/19/2021 </b><br>
 <i> Output: 2021-06</i><br>
 W.E.B. Du Bois Recreations<br><br>
